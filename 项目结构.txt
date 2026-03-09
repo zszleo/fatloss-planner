@@ -1,0 +1,105 @@
+fatloss-planner/
+│
+├── src/
+│   └── fatloss/
+│       ├── __init__.py
+│       │
+│       ├── calculator/                 # 核心计算引擎
+│       │   ├── __init__.py
+│       │   ├── bmr_calculator.py      # 基础代谢率计算
+│       │   ├── tdee_calculator.py     # 每日总能量消耗计算
+│       │   ├── nutrition_calculator.py # 营养素分配计算
+│       │   └── time_predictor.py      # 减脂时间预测
+│       │
+│       ├── models/                     # 数据模型
+│       │   ├── __init__.py
+│       │   ├── user_profile.py        # 用户档案
+│       │   ├── weight_record.py       # 体重记录
+│       │   ├── nutrition_plan.py      # 营养计划
+│       │   └── app_config.py          # 应用配置
+│       │
+│       ├── repository/                 # 数据访问层
+│       │   ├── __init__.py
+│       │   ├── base.py                # 抽象Repository
+│       │   ├── user_repository.py     # 用户数据访问
+│       │   ├── weight_repository.py   # 体重记录访问
+│       │   ├── plan_repository.py     # 计划数据访问
+│       │   └── database.py            # 数据库连接与初始化
+│       │
+│       ├── planner/                    # 业务服务层
+│       │   ├── __init__.py
+│       │   ├── plan_service.py        # 计划生成服务
+│       │   ├── adjustment_service.py  # 调整策略服务
+│       │   └── validation_service.py  # 数据验证服务
+│       │
+│       ├── cli/                        # 命令行界面
+│       │   ├── __init__.py
+│       │   ├── main.py                # 主CLI入口
+│       │   ├── commands/              # 命令集合
+│       │   │   ├── __init__.py
+│       │   │   ├── calculate_cmd.py   # 计算命令
+│       │   │   ├── plan_cmd.py        # 计划命令
+│       │   │   ├── adjust_cmd.py      # 调整命令
+│       │   │   └── config_cmd.py      # 配置命令
+│       │   └── utils/                 # CLI工具
+│       │       └── __init__.py
+│       │
+│       ├── api/                       # Web API (可选)
+│       │   ├── __init__.py
+│       │   ├── main.py               # FastAPI应用
+│       │   ├── routers/              # 路由模块
+│       │   │   ├── __init__.py
+│       │   │   ├── calculator.py     # 计算API
+│       │   │   └── planner.py        # 计划API
+│       │   └── dependencies/         # 依赖注入
+│       │       └── __init__.py
+│       │
+│       └── utils/                     # 通用工具
+│           ├── __init__.py
+│           ├── constants.py          # 常量定义
+│           └── validators.py         # 验证工具
+│
+├── tests/                            # 测试代码
+│   ├── __init__.py
+│   ├── conftest.py                  # pytest配置
+│   │
+│   ├── unit/                        # 单元测试
+│   │   ├── __init__.py
+│   │   ├── test_calculator/         # 计算引擎测试
+│   │   ├── test_models/             # 模型测试
+│   │   └── test_utils/              # 工具测试
+│   │
+│   ├── integration/                 # 集成测试
+│   │   ├── __init__.py
+│   │   ├── test_repository/         # 存储层测试
+│   │   └── test_planner/            # 业务服务测试
+│   │
+│   └── e2e/                         # 端到端测试
+│       ├── __init__.py
+│       ├── test_cli/                # CLI测试
+│       └── test_api/                # API测试(可选)
+│
+├── docs/                            # 文档
+│   ├── index.md
+│   ├── architecture.md              # 架构设计
+│   ├── api/                         # API文档
+│   │   └── index.md
+│   └── user/                        # 用户文档
+│       └── guide.md
+│
+├── scripts/                         # 脚本工具
+│   ├── setup_database.py           # 数据库初始化
+│   └── generate_docs.py            # 文档生成
+│
+├── data/                           # 数据文件(示例、配置)
+│   ├── sample_plans/               # 示例计划
+│   └── food_database/              # 食物数据库(可选)
+│
+├── .env.example                    # 环境变量示例
+├── .gitignore                      # Git忽略配置
+├── pyproject.toml                  # 项目配置与依赖
+├── README.md                       # 项目说明
+├── 实施计划.md                      # 详细实施计划
+├── 业务逻辑参考.md                  # 用户原文与业务逻辑
+├── 项目结构.txt                     # 本项目结构文档
+└── LICENSE                         # 许可证文件
