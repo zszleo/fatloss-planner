@@ -43,7 +43,6 @@ dev = [
     "isort>=5.12.0",
     "pylint>=3.0.0",
     "mypy>=1.0.0",
-    "pre-commit>=3.0.0",
     "alembic>=1.12.0",
 ]
 docs = [

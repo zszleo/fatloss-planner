@@ -26,9 +26,9 @@
 
 1. **依赖安装问题**：已通过创建虚拟环境解决 ✅
    - 虚拟环境 (`venv/`) 已创建并激活（验证：`venv/bin/activate` 文件存在）
-   - 所有核心依赖 (`pydantic`, `sqlalchemy`, `click`) 和开发依赖 (`pytest`, `alembic`, `black`, `isort`, `mypy`, `pre-commit`) 已成功安装
+   - 所有核心依赖 (`pydantic`, `sqlalchemy`, `click`) 和开发依赖 (`pytest`, `alembic`, `black`, `isort`, `mypy`) 已成功安装
    - 验证：`python -c "import pydantic; print(pydantic.__version__)"` 返回 2.12.5
-   - 验证：`pytest --version` 返回 9.0.2，`mypy --version` 返回 1.19.1，`pre-commit --version` 返回 4.5.1
+   - 验证：`pytest --version` 返回 9.0.2，`mypy --version` 返回 1.19.1
 
 2. **虚拟环境**：已解决 ✅
    - `python3-venv` 已安装，`venv/` 目录完整存在（包含完整的Python环境）
@@ -64,10 +64,8 @@
 
 7. **开发工具完整性已解决** ✅
    - `mypy` 类型检查工具已安装（版本1.19.1），配置完整，可用
-   - `pre-commit` 工具已安装（版本4.5.1），钩子已安装（`.git/hooks/pre-commit` 文件存在）
-   - 已运行 `git init` 和 `pre-commit install`，完整开发工作流已配置
+   - 已运行 `git init` ，完整开发工作流已配置
    - 所有开发工具（black, isort, pylint, mypy, pytest）已可用且配置正确
-   - 验证：`pre-commit` 钩子安装成功，`.git/hooks/pre-commit` 文件存在
 
 ## 环境设置
 
@@ -301,15 +299,6 @@ pylint src/
 mypy src/
 ```
 
-### 预提交钩子
-```bash
-# 安装预提交钩子
-pre-commit install
-
-# 运行所有钩子
-pre-commit run --all-files
-```
-
 ## 开发工作流
 
 1. **创建功能分支**
@@ -343,7 +332,7 @@ pre-commit run --all-files
 3. ✅ 创建数据库初始化脚本 - **已完成**（提供完整CLI工具）
 4. ✅ 迁移Pydantic V1到V2 - **已完成**（已迁移4个模型文件中的10处V1代码）
 5. ✅ 统一数据库路径配置 - **已完成**（更新DEFAULT_DATABASE_URL为sqlite:///./data/fatloss.db）
-6. ✅ 验证完整开发工具链 - **已完成**（mypy可用，pre-commit钩子已安装，git仓库已初始化）
+6. ✅ 验证完整开发工具链 - **已完成**（mypy可用，git仓库已初始化）
 
 ### Phase 3: CLI接口（预计3天）
 - 实现CLI命令结构
