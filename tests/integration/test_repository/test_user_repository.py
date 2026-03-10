@@ -194,6 +194,61 @@ class TestUserRepositoryIntegration:
         assert len(female_users) == 1
         assert female_users[0].name == "女性用户"
 
+    def test_find_by_age_range(self, repository):
+        """测试根据年龄范围查找用户"""
+        from datetime import date
+        
+        # 创建测试用户
+        user1 = UserProfile(
+            name="年轻用户",
+            gender=Gender.MALE,
+            birth_date=date(2000, 1, 1),  # 约24岁（假设当前年份为2025）
+            height_cm=175.0,
+            initial_weight_kg=70.0,
+            activity_level=ActivityLevel.MODERATE,
+        )
+        
+        user2 = UserProfile(
+            name="中年用户",
+            gender=Gender.FEMALE,
+            birth_date=date(1980, 1, 1),  # 约44岁
+            height_cm=165.0,
+            initial_weight_kg=60.0,
+            activity_level=ActivityLevel.ACTIVE,
+        )
+        
+        user3 = UserProfile(
+            name="老年用户",
+            gender=Gender.MALE,
+            birth_date=date(1960, 1, 1),  # 约64岁
+            height_cm=180.0,
+            initial_weight_kg=80.0,
+            activity_level=ActivityLevel.SEDENTARY,
+        )
+        
+        repository.create(user1)
+        repository.create(user2)
+        repository.create(user3)
+        
+        # 查找20-30岁的用户
+        young_users = repository.find_by_age_range(20, 30)
+        assert len(young_users) == 1
+        assert young_users[0].name == "年轻用户"
+        
+        # 查找40-50岁的用户
+        middle_users = repository.find_by_age_range(40, 50)
+        assert len(middle_users) == 1
+        assert middle_users[0].name == "中年用户"
+        
+        # 查找60-70岁的用户
+        old_users = repository.find_by_age_range(60, 70)
+        assert len(old_users) == 1
+        assert old_users[0].name == "老年用户"
+        
+        # 查找0-100岁的用户（应该返回所有用户）
+        all_age_users = repository.find_by_age_range(0, 100)
+        assert len(all_age_users) >= 3
+
     def test_count_users(self, repository, sample_user):
         """测试统计用户数量"""
         # 初始数量

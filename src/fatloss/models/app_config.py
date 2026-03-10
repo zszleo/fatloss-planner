@@ -1,5 +1,6 @@
 """应用程序配置模型"""
 
+from datetime import date
 from enum import Enum
 
 from pydantic import BaseModel, Field, ConfigDict
@@ -44,5 +45,10 @@ class AppConfig(BaseModel):
     )
     enable_notifications: bool = Field(default=True, description="启用通知")
     data_retention_days: int = Field(default=365, gt=0, description="数据保留天数")
+    created_at: date = Field(default_factory=date.today, description="创建日期")
+    updated_at: date = Field(default_factory=date.today, description="更新日期")
 
-    model_config = ConfigDict(use_enum_values=True)
+    model_config = ConfigDict(
+        use_enum_values=True,
+        json_encoders={date: lambda d: d.isoformat()}
+    )
