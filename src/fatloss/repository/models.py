@@ -9,7 +9,7 @@ from datetime import date
 from sqlalchemy import Boolean, Column, Date, Enum, Float, Integer, String, Text
 from sqlalchemy.sql import func
 
-from src.fatloss.repository.database import Base
+from fatloss.repository.database import Base
 
 
 class GenderEnum(str, enum.Enum):
@@ -48,6 +48,7 @@ class UserProfileModel(Base):
     """用户档案ORM模型"""
 
     __tablename__ = "user_profiles"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
@@ -74,6 +75,7 @@ class WeightRecordModel(Base):
     """体重记录ORM模型"""
 
     __tablename__ = "weight_records"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False, index=True)
@@ -90,6 +92,7 @@ class DailyNutritionPlanModel(Base):
     """每日营养计划ORM模型"""
 
     __tablename__ = "daily_nutrition_plans"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False, index=True)
@@ -111,6 +114,7 @@ class WeeklyNutritionPlanModel(Base):
     """每周营养计划ORM模型"""
 
     __tablename__ = "weekly_nutrition_plans"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False, index=True)
@@ -130,6 +134,7 @@ class AppConfigModel(Base):
     """应用程序配置ORM模型"""
 
     __tablename__ = "app_configs"
+    __table_args__ = {'extend_existing': True}
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, nullable=False, index=True, unique=True)

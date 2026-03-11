@@ -57,7 +57,7 @@ Issues = "https://github.com/yourusername/fatloss-planner/issues"
 
 [project.scripts]
 fatloss-planner = "fatloss.cli.main:main"
-fatloss-db = "scripts.init_db:cli"
+fatloss-db = "fatloss.scripts.init_db:cli"
 
 [build-system]
 requires = ["setuptools>=61.0.0", "wheel"]

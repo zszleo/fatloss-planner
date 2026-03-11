@@ -7,10 +7,10 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from src.fatloss.models.app_config import AppConfig
-from src.fatloss.repository.mapper import app_config_from_model, app_config_to_model
-from src.fatloss.repository.models import AppConfigModel
-from src.fatloss.repository.sqlalchemy_repository import SQLAlchemyFilterableRepository
+from fatloss.models.app_config import AppConfig
+from fatloss.repository.mapper import app_config_from_model, app_config_to_model
+from fatloss.repository.models import AppConfigModel
+from fatloss.repository.sqlalchemy_repository import SQLAlchemyFilterableRepository
 
 
 class AppConfigRepository(

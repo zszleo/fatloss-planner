@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import Column, Date, Float, Integer, String, create_engine
 from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
-from src.fatloss.repository.sqlalchemy_repository import (
+from fatloss.repository.sqlalchemy_repository import (
     SQLAlchemyDateRangeRepository,
     SQLAlchemyFilterableRepository,
     SQLAlchemyRepository,

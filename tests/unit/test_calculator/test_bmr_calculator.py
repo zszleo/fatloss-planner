@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.fatloss.calculator.bmr_calculator import Gender, calculate_bmr
+from fatloss.calculator.bmr_calculator import Gender, calculate_bmr
 
 
 class TestBMRCalculator:

@@ -9,13 +9,13 @@ from typing import Optional
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository.mapper import (
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository.mapper import (
     weight_record_from_model,
     weight_record_to_model,
 )
-from src.fatloss.repository.models import WeightRecordModel
-from src.fatloss.repository.sqlalchemy_repository import SQLAlchemyDateRangeRepository
+from fatloss.repository.models import WeightRecordModel
+from fatloss.repository.sqlalchemy_repository import SQLAlchemyDateRangeRepository
 
 
 class WeightRepository(

@@ -6,11 +6,11 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.models.app_config import AppConfig, UnitSystem, Theme
-from src.fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository import init_database
-from src.fatloss.repository.unit_of_work import (
+from fatloss.models.app_config import AppConfig, UnitSystem, Theme
+from fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository import init_database
+from fatloss.repository.unit_of_work import (
     DatabaseContext,
     UnitOfWork,
     unit_of_work,
@@ -197,7 +197,7 @@ class TestUnitOfWorkIntegration:
             assert session.is_active
             # 可以执行数据库操作
             # 例如查询用户表
-            from src.fatloss.repository.models import UserProfileModel
+            from fatloss.repository.models import UserProfileModel
             users = session.query(UserProfileModel).all()
             assert users is not None
             
@@ -239,7 +239,7 @@ class TestUnitOfWorkIntegration:
             
         # 验证用户已保存（使用新会话）
         with db.session_scope() as session:
-            from src.fatloss.repository import UserRepository
+            from fatloss.repository import UserRepository
             repo = UserRepository(session)
             retrieved = repo.get_by_id(created.id) if created.id else None
             assert retrieved is not None
@@ -304,7 +304,7 @@ class TestUnitOfWorkIntegration:
             assert uow.session is not None
             
             # 可以执行数据库操作
-            from src.fatloss.repository import init_database
+            from fatloss.repository import init_database
             init_database(uow.session.bind)
             
             # 创建测试用户
@@ -340,7 +340,7 @@ class TestUnitOfWorkIntegration:
                 assert uow.session is not None
                 
                 # 可以执行数据库操作
-                from src.fatloss.repository import init_database
+                from fatloss.repository import init_database
                 init_database(uow.session.bind)
                 
                 # 创建测试用户

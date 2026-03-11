@@ -3,7 +3,7 @@
 from datetime import date
 import pytest
 
-from src.fatloss.models.user_profile import UserProfile, Gender, ActivityLevel
+from fatloss.models.user_profile import UserProfile, Gender, ActivityLevel
 
 
 class TestUserProfile:
@@ -55,7 +55,7 @@ class TestUserProfile:
         """测试年龄计算"""
         # 使用固定日期以确保测试可重复性
         from unittest.mock import patch
-        with patch("src.fatloss.models.user_profile.date") as mock_date:
+        with patch("fatloss.models.user_profile.date") as mock_date:
             mock_date.today.return_value = date(2024, 12, 31)
             mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
             
@@ -72,7 +72,7 @@ class TestUserProfile:
     def test_age_calculation_before_birthday(self):
         """测试生日前的年龄计算"""
         from unittest.mock import patch
-        with patch("src.fatloss.models.user_profile.date") as mock_date:
+        with patch("fatloss.models.user_profile.date") as mock_date:
             mock_date.today.return_value = date(2024, 3, 1)
             mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
             

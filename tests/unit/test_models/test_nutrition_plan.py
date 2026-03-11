@@ -3,8 +3,8 @@
 from datetime import date, timedelta
 import pytest
 
-from src.fatloss.calculator.nutrition_calculator import NutritionDistribution
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.calculator.nutrition_calculator import NutritionDistribution
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
 
 
 class TestDailyNutritionPlan:

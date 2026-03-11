@@ -2,7 +2,7 @@
 
 from datetime import date
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 
 
 class WeightRecord(BaseModel):
@@ -14,7 +14,13 @@ class WeightRecord(BaseModel):
     record_date: date = Field(..., description="记录日期")
     notes: str = Field(default="", max_length=500, description="备注")
     created_at: date = Field(default_factory=date.today, description="创建日期")
-    model_config = ConfigDict(json_encoders={date: lambda d: d.isoformat()})
+
+    @field_serializer('record_date', 'created_at')
+    def serialize_date(self, value: date, _info):
+        """序列化日期字段为ISO格式"""
+        return value.isoformat() if value else None
+
+    model_config = ConfigDict()
 
     @field_validator("weight_kg", mode="before")
     def validate_weight(cls, v):

@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository import WeightRepository, init_database
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository import WeightRepository, init_database
 
 
 class TestWeightRepositoryIntegration:

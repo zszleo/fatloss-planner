@@ -9,18 +9,18 @@ from typing import List, Optional
 from sqlalchemy import and_, desc
 from sqlalchemy.orm import Session
 
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
-from src.fatloss.repository.mapper import (
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.repository.mapper import (
     daily_nutrition_plan_from_model,
     daily_nutrition_plan_to_model,
     weekly_nutrition_plan_from_model,
     weekly_nutrition_plan_to_model,
 )
-from src.fatloss.repository.models import (
+from fatloss.repository.models import (
     DailyNutritionPlanModel,
     WeeklyNutritionPlanModel,
 )
-from src.fatloss.repository.sqlalchemy_repository import SQLAlchemyDateRangeRepository
+from fatloss.repository.sqlalchemy_repository import SQLAlchemyDateRangeRepository
 
 
 class DailyNutritionRepository(

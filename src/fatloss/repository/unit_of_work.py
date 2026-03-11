@@ -8,14 +8,14 @@ from typing import Generator
 
 from sqlalchemy.orm import Session
 
-from src.fatloss.repository.app_config_repository import AppConfigRepository
-from src.fatloss.repository.database import create_engine_from_url, get_session
-from src.fatloss.repository.nutrition_repository import (
+from fatloss.repository.app_config_repository import AppConfigRepository
+from fatloss.repository.database import create_engine_from_url, get_session
+from fatloss.repository.nutrition_repository import (
     DailyNutritionRepository,
     WeeklyNutritionRepository,
 )
-from src.fatloss.repository.user_repository import UserRepository
-from src.fatloss.repository.weight_repository import WeightRepository
+from fatloss.repository.user_repository import UserRepository
+from fatloss.repository.weight_repository import WeightRepository
 
 
 class UnitOfWork:

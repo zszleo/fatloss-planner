@@ -3,6 +3,18 @@
 计算基于基础代谢率和训练消耗的总能量消耗。
 """
 
+from fatloss.utils.validation import validate_range, validate_positive
+
+
+class TDEEConstants:
+    """TDEE计算相关常量"""
+    
+    CALORIES_PER_MINUTE_EXERCISE = 10.0  # 每分钟运动消耗10大卡
+    
+    # 输入验证范围
+    EXERCISE_MINUTES_RANGE_MIN = 0
+    EXERCISE_MINUTES_RANGE_MAX = 300
+
 
 def calculate_tdee(bmr: float, exercise_minutes: float) -> float:
     """计算每日总能量消耗（TDEE）。
@@ -17,12 +29,10 @@ def calculate_tdee(bmr: float, exercise_minutes: float) -> float:
     Raises:
         ValueError: 如果输入参数超出合理范围
     """
-    if bmr <= 0:
-        raise ValueError(f"BMR必须为正数，当前值：{bmr}")
-    if not (0 <= exercise_minutes <= 300):
-        raise ValueError(f"训练时间必须在0-300分钟之间，当前值：{exercise_minutes}")
+    validate_positive(bmr, "BMR")
+    validate_range(exercise_minutes, TDEEConstants.EXERCISE_MINUTES_RANGE_MIN, TDEEConstants.EXERCISE_MINUTES_RANGE_MAX, "训练时间", "分钟")
 
-    exercise_calories = exercise_minutes * 10
+    exercise_calories = exercise_minutes * TDEEConstants.CALORIES_PER_MINUTE_EXERCISE
     tdee = bmr + exercise_calories
 
     return round(tdee, 2)

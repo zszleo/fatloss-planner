@@ -1,24 +1,10 @@
 """应用程序配置模型"""
 
 from datetime import date
-from enum import Enum
 
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_serializer
 
-
-class UnitSystem(str, Enum):
-    """单位制"""
-
-    METRIC = "metric"  # 公制（千克，厘米）
-    IMPERIAL = "imperial"  # 英制（磅，英尺）
-
-
-class Theme(str, Enum):
-    """主题"""
-
-    LIGHT = "light"
-    DARK = "dark"
-    AUTO = "auto"
+from .enums import UnitSystem, Theme
 
 
 class AppConfig(BaseModel):
@@ -48,7 +34,11 @@ class AppConfig(BaseModel):
     created_at: date = Field(default_factory=date.today, description="创建日期")
     updated_at: date = Field(default_factory=date.today, description="更新日期")
 
+    @field_serializer('created_at', 'updated_at')
+    def serialize_date(self, value: date, _info):
+        """序列化日期字段为ISO格式"""
+        return value.isoformat() if value else None
+
     model_config = ConfigDict(
         use_enum_values=True,
-        json_encoders={date: lambda d: d.isoformat()}
     )

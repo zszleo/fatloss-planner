@@ -1,26 +1,10 @@
 """用户档案数据模型"""
 
 from datetime import date
-from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 
-
-class Gender(str, Enum):
-    """性别"""
-
-    MALE = "male"
-    FEMALE = "female"
-
-
-class ActivityLevel(str, Enum):
-    """活动水平"""
-
-    SEDENTARY = "sedentary"  # 久坐
-    LIGHT = "light"  # 轻度活动
-    MODERATE = "moderate"  # 中度活动
-    ACTIVE = "active"  # 活跃
-    VERY_ACTIVE = "very_active"  # 非常活跃
+from .enums import Gender, ActivityLevel
 
 
 class UserProfile(BaseModel):
@@ -37,8 +21,14 @@ class UserProfile(BaseModel):
     )
     created_at: date = Field(default_factory=date.today, description="创建日期")
     updated_at: date = Field(default_factory=date.today, description="更新日期")
+
+    @field_serializer('created_at', 'updated_at')
+    def serialize_date(self, value: date, _info):
+        """序列化日期字段为ISO格式"""
+        return value.isoformat() if value else None
+
     model_config = ConfigDict(
-        use_enum_values=True, json_encoders={date: lambda d: d.isoformat()}
+        use_enum_values=True,
     )
 
     @field_validator("height_cm", mode="before")

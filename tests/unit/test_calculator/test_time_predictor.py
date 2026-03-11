@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.fatloss.calculator.time_predictor import (
+from fatloss.calculator.time_predictor import (
     WeightLossPrediction,
     calculate_weekly_adjustment,
     predict_weight_loss_time,

@@ -7,7 +7,7 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.repository.database import (
+from fatloss.repository.database import (
     DEFAULT_DATABASE_URL,
     Base,
     create_engine_from_url,
@@ -58,7 +58,7 @@ class TestDatabaseConfig:
         # 不应该使用StaticPool
         assert engine.pool.__class__.__name__ != "StaticPool"
 
-    @patch('src.fatloss.repository.database.create_engine')
+    @patch('fatloss.repository.database.create_engine')
     def test_create_engine_from_url_other_database(self, mock_create_engine):
         """测试其他数据库引擎（如PostgreSQL）"""
         # 模拟引擎对象

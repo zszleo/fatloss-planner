@@ -6,6 +6,21 @@
 from dataclasses import dataclass
 from typing import Tuple
 
+from fatloss.utils.validation import validate_positive
+
+
+class WeightLossConstants:
+    """减脂预测相关常量"""
+    
+    # 减脂速率限制（基于体重的百分比）
+    MONTHLY_MAX_LOSS_PERCENT = 0.05  # 每月最大减重5%
+    
+    # 时间单位换算
+    WEEKS_PER_MONTH = 4.0  # 假设每月4周
+    
+    # 调整阈值
+    ADJUSTMENT_THRESHOLD_PERCENT = 0.2  # 20%差异阈值
+
 
 @dataclass
 class WeightLossPrediction:
@@ -33,21 +48,19 @@ def predict_weight_loss_time(
     Raises:
         ValueError: 如果体重参数无效
     """
-    if current_weight_kg <= 0:
-        raise ValueError(f"当前体重必须为正数，当前值：{current_weight_kg}")
-    if target_weight_kg <= 0:
-        raise ValueError(f"目标体重必须为正数，当前值：{target_weight_kg}")
+    validate_positive(current_weight_kg, "当前体重")
+    validate_positive(target_weight_kg, "目标体重")
     if target_weight_kg >= current_weight_kg:
         raise ValueError(
             f"目标体重必须小于当前体重，当前：{current_weight_kg}，目标：{target_weight_kg}"
         )
 
     total_loss = current_weight_kg - target_weight_kg
-    monthly_loss = current_weight_kg * 0.05  # 每月最大减重5%
-    weekly_loss = monthly_loss / 4  # 假设每月4周
+    monthly_loss = current_weight_kg * WeightLossConstants.MONTHLY_MAX_LOSS_PERCENT
+    weekly_loss = monthly_loss / WeightLossConstants.WEEKS_PER_MONTH
 
     estimated_months = total_loss / monthly_loss
-    estimated_weeks = estimated_months * 4
+    estimated_weeks = estimated_months * WeightLossConstants.WEEKS_PER_MONTH
 
     return WeightLossPrediction(
         total_loss_kg=round(total_loss, 2),
@@ -77,16 +90,14 @@ def calculate_weekly_adjustment(
     Raises:
         ValueError: 如果体重参数无效
     """
-    if current_weight_kg <= 0:
-        raise ValueError(f"当前体重必须为正数，当前值：{current_weight_kg}")
-    if previous_weight_kg <= 0:
-        raise ValueError(f"上周体重必须为正数，当前值：{previous_weight_kg}")
+    validate_positive(current_weight_kg, "当前体重")
+    validate_positive(previous_weight_kg, "上周体重")
 
     actual_loss = previous_weight_kg - current_weight_kg
     loss_difference = actual_loss - expected_weekly_loss_kg
 
     # 设置调整阈值：如果差异超过预期值的20%，则进行调整
-    threshold = expected_weekly_loss_kg * 0.2
+    threshold = expected_weekly_loss_kg * WeightLossConstants.ADJUSTMENT_THRESHOLD_PERCENT
 
     if loss_difference > threshold:
         # 体重下降过快，需要增加碳水

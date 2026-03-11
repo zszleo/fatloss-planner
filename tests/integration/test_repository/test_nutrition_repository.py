@@ -6,9 +6,9 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
-from src.fatloss.calculator.nutrition_calculator import NutritionDistribution
-from src.fatloss.repository import DailyNutritionRepository, WeeklyNutritionRepository, init_database
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.calculator.nutrition_calculator import NutritionDistribution
+from fatloss.repository import DailyNutritionRepository, WeeklyNutritionRepository, init_database
 
 
 class TestNutritionRepositoryIntegration:

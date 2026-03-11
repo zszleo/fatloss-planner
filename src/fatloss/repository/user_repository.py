@@ -3,12 +3,14 @@
 用户档案数据访问层。
 """
 
+from datetime import date
+from sqlalchemy import bindparam
 from sqlalchemy.orm import Session
 
-from src.fatloss.models.user_profile import UserProfile
-from src.fatloss.repository.mapper import user_profile_from_model, user_profile_to_model
-from src.fatloss.repository.models import UserProfileModel
-from src.fatloss.repository.sqlalchemy_repository import SQLAlchemyFilterableRepository
+from fatloss.models.user_profile import UserProfile
+from fatloss.repository.mapper import user_profile_from_model, user_profile_to_model
+from fatloss.repository.models import UserProfileModel
+from fatloss.repository.sqlalchemy_repository import SQLAlchemyFilterableRepository
 
 
 class UserRepository(
@@ -43,7 +45,8 @@ class UserRepository(
         """
         models = (
             self.session.query(UserProfileModel)
-            .filter(UserProfileModel.name.ilike(f"%{name}%"))
+            .filter(UserProfileModel.name.ilike(bindparam("name_pattern")))
+            .params(name_pattern=f"%{name}%")
             .all()
         )
         return [self._to_pydantic(model) for model in models]
@@ -71,8 +74,6 @@ class UserRepository(
         """
         # 注意：这里需要计算年龄，由于数据库存储的是出生日期
         # 这是一个简化实现，实际生产环境可能需要更复杂的查询
-        from datetime import date
-
         today = date.today()
 
         max_birth_date = date(today.year - min_age, today.month, today.day)

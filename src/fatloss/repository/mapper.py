@@ -6,12 +6,12 @@
 from datetime import date
 from typing import Optional
 
-from src.fatloss.calculator.nutrition_calculator import NutritionDistribution
-from src.fatloss.models.app_config import AppConfig, Theme, UnitSystem
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
-from src.fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository.models import (
+from fatloss.calculator.nutrition_calculator import NutritionDistribution
+from fatloss.models.app_config import AppConfig, Theme, UnitSystem
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository.models import (
     ActivityLevelEnum,
     AppConfigModel,
     DailyNutritionPlanModel,
@@ -23,29 +23,83 @@ from src.fatloss.repository.models import (
     WeightRecordModel,
 )
 
+# 映射字典：Pydantic枚举值到SQLAlchemy枚举值的映射
+GENDER_MAP = {
+    Gender.MALE: GenderEnum.MALE,
+    Gender.FEMALE: GenderEnum.FEMALE,
+}
+
+GENDER_REVERSE_MAP = {v: k for k, v in GENDER_MAP.items()}
+
+ACTIVITY_LEVEL_MAP = {
+    ActivityLevel.SEDENTARY: ActivityLevelEnum.SEDENTARY,
+    ActivityLevel.LIGHT: ActivityLevelEnum.LIGHT,
+    ActivityLevel.MODERATE: ActivityLevelEnum.MODERATE,
+    ActivityLevel.ACTIVE: ActivityLevelEnum.ACTIVE,
+    ActivityLevel.VERY_ACTIVE: ActivityLevelEnum.VERY_ACTIVE,
+}
+
+ACTIVITY_LEVEL_REVERSE_MAP = {v: k for k, v in ACTIVITY_LEVEL_MAP.items()}
+
+# UnitSystem和Theme的值相同，不需要映射
+UNIT_SYSTEM_MAP = {
+    UnitSystem.METRIC: UnitSystemEnum.METRIC,
+    UnitSystem.IMPERIAL: UnitSystemEnum.IMPERIAL,
+}
+
+UNIT_SYSTEM_REVERSE_MAP = {v: k for k, v in UNIT_SYSTEM_MAP.items()}
+
+THEME_MAP = {
+    Theme.LIGHT: ThemeEnum.LIGHT,
+    Theme.DARK: ThemeEnum.DARK,
+    Theme.AUTO: ThemeEnum.AUTO,
+}
+
+THEME_REVERSE_MAP = {v: k for k, v in THEME_MAP.items()}
+
 
 def to_sqlalchemy_gender(gender: Gender | str) -> GenderEnum:
     """将Pydantic Gender或字符串转换为SQLAlchemy GenderEnum"""
     if isinstance(gender, str):
-        return GenderEnum(gender)
-    return GenderEnum(gender.value)
+        # 处理字符串值："男" -> GenderEnum.MALE
+        if gender == Gender.MALE.value:
+            return GenderEnum.MALE
+        elif gender == Gender.FEMALE.value:
+            return GenderEnum.FEMALE
+        else:
+            # 尝试直接转换（可能已经是"male"或"female"）
+            return GenderEnum(gender)
+    return GENDER_MAP[gender]
 
 
 def to_pydantic_gender(gender: GenderEnum) -> Gender:
     """将SQLAlchemy GenderEnum转换为Pydantic Gender"""
-    return Gender(gender.value)
+    return GENDER_REVERSE_MAP[gender]
 
 
 def to_sqlalchemy_activity_level(level: ActivityLevel | str) -> ActivityLevelEnum:
     """将Pydantic ActivityLevel或字符串转换为SQLAlchemy ActivityLevelEnum"""
     if isinstance(level, str):
-        return ActivityLevelEnum(level)
-    return ActivityLevelEnum(level.value)
+        # 处理中文字符串值
+        if level == ActivityLevel.SEDENTARY.value:
+            return ActivityLevelEnum.SEDENTARY
+        elif level == ActivityLevel.LIGHT.value:
+            return ActivityLevelEnum.LIGHT
+        elif level == ActivityLevel.MODERATE.value:
+            return ActivityLevelEnum.MODERATE
+        elif level == ActivityLevel.ACTIVE.value:
+            return ActivityLevelEnum.ACTIVE
+        elif level == ActivityLevel.VERY_ACTIVE.value:
+            return ActivityLevelEnum.VERY_ACTIVE
+        else:
+            # 尝试直接转换（可能已经是英文值）
+            return ActivityLevelEnum(level)
+    return ACTIVITY_LEVEL_MAP[level]
 
 
 def to_pydantic_activity_level(level: ActivityLevelEnum) -> ActivityLevel:
     """将SQLAlchemy ActivityLevelEnum转换为Pydantic ActivityLevel"""
-    return ActivityLevel(level.value)
+    return ACTIVITY_LEVEL_REVERSE_MAP[level]
 
 
 def to_sqlalchemy_unit_system(unit: UnitSystem | str) -> UnitSystemEnum:

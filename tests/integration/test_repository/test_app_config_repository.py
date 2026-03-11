@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.models.app_config import AppConfig, Theme, UnitSystem
-from src.fatloss.repository import AppConfigRepository, init_database
+from fatloss.models.app_config import AppConfig, Theme, UnitSystem
+from fatloss.repository import AppConfigRepository, init_database
 
 
 class TestAppConfigRepositoryIntegration:

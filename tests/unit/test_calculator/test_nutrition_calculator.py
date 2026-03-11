@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.fatloss.calculator.nutrition_calculator import (
+from fatloss.calculator.nutrition_calculator import (
     NutritionDistribution,
     adjust_carbohydrates,
     calculate_nutrition,

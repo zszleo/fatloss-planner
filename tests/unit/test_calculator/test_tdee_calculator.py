@@ -2,7 +2,7 @@
 
 import pytest
 
-from src.fatloss.calculator.tdee_calculator import calculate_tdee
+from fatloss.calculator.tdee_calculator import calculate_tdee
 
 
 class TestTDEECalculator:

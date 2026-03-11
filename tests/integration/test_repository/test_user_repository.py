@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
-from src.fatloss.repository import UserRepository, init_database
+from fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
+from fatloss.repository import UserRepository, init_database
 
 
 class TestUserRepositoryIntegration:

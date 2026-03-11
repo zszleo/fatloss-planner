@@ -3,9 +3,9 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
 
-from src.fatloss.calculator.nutrition_calculator import NutritionDistribution
+from fatloss.calculator.nutrition_calculator import NutritionDistribution
 
 
 class DailyNutritionPlan(BaseModel):
@@ -20,7 +20,13 @@ class DailyNutritionPlan(BaseModel):
     adjustment_units: int = Field(default=0, description="碳水化合物调整单位数")
     notes: str = Field(default="", max_length=500, description="备注")
     created_at: date = Field(default_factory=date.today, description="创建日期")
-    model_config = ConfigDict(json_encoders={date: lambda d: d.isoformat()})
+
+    @field_serializer('plan_date', 'created_at')
+    def serialize_date(self, value: date, _info):
+        """序列化日期字段为ISO格式"""
+        return value.isoformat() if value else None
+
+    model_config = ConfigDict()
 
     @field_validator("plan_date", mode="before")
     def validate_plan_date(cls, v):
@@ -47,6 +53,11 @@ class WeeklyNutritionPlan(BaseModel):
     total_fat_g: float = Field(..., gt=0, description="周脂肪总量（克）")
     notes: str = Field(default="", max_length=1000, description="备注")
     created_at: date = Field(default_factory=date.today, description="创建日期")
+
+    @field_serializer('week_start_date', 'week_end_date', 'created_at')
+    def serialize_date(self, value: date, _info):
+        """序列化日期字段为ISO格式"""
+        return value.isoformat() if value else None
 
     @field_validator("week_end_date", mode="before")
     def validate_week_dates(cls, v, info):

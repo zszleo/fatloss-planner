@@ -12,13 +12,13 @@ from sqlalchemy import inspect
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.fatloss.repository.database import (
+from fatloss.repository.database import (
     create_engine_from_url,
     get_database_url,
     init_database,
     Base,
 )
-from src.fatloss.repository.models import (
+from fatloss.repository.models import (
     UserProfileModel,
     WeightRecordModel,
     DailyNutritionPlanModel,

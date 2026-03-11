@@ -3,12 +3,12 @@
 import pytest
 from datetime import date
 
-from src.fatloss.calculator.nutrition_calculator import NutritionDistribution
-from src.fatloss.models.app_config import AppConfig, Theme, UnitSystem
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
-from src.fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository.mapper import (
+from fatloss.calculator.nutrition_calculator import NutritionDistribution
+from fatloss.models.app_config import AppConfig, Theme, UnitSystem
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.models.user_profile import ActivityLevel, Gender, UserProfile
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository.mapper import (
     app_config_from_model,
     app_config_to_model,
     daily_nutrition_plan_from_model,
@@ -28,7 +28,7 @@ from src.fatloss.repository.mapper import (
     weight_record_from_model,
     weight_record_to_model,
 )
-from src.fatloss.repository.models import (
+from fatloss.repository.models import (
     ActivityLevelEnum,
     AppConfigModel,
     DailyNutritionPlanModel,

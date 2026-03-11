@@ -9,12 +9,12 @@ from typing import Any, Generic, List, Optional, Type, TypeVar
 from sqlalchemy import and_, desc, or_
 from sqlalchemy.orm import Session
 
-from src.fatloss.repository.abstract_repository import (
+from fatloss.repository.abstract_repository import (
     BaseRepository,
     DateRangeRepository,
     FilterableRepository,
 )
-from src.fatloss.repository.database import Base
+from fatloss.repository.database import Base
 
 T = TypeVar("T")  # Pydantic模型类型
 M = TypeVar("M", bound=Base)  # SQLAlchemy模型类型
@@ -64,14 +64,16 @@ class SQLAlchemyRepository(BaseRepository[T, ID], Generic[T, M, ID]):
         Returns:
             实体列表
         """
-        models = (
+        query = (
             self.session.query(self.model_class)
             .order_by(self.model_class.id)
             .offset(skip)
             .limit(limit)
-            .all()
         )
-        return [self._to_pydantic(model) for model in models]
+        results = []
+        for model in query.yield_per(50):  # 分批处理，每批50条记录
+            results.append(self._to_pydantic(model))
+        return results
 
     def create(self, entity: T) -> T:
         """创建新实体。

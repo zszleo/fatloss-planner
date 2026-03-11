@@ -5,6 +5,25 @@
 
 from dataclasses import dataclass
 
+from fatloss.utils.validation import validate_positive
+
+
+class NutritionConstants:
+    """营养计算相关常量"""
+    
+    # 宏量营养素比例
+    CARBOHYDRATE_RATIO = 0.5  # 50% 碳水化合物
+    PROTEIN_RATIO = 0.3  # 30% 蛋白质
+    FAT_RATIO = 0.2  # 20% 脂肪
+    
+    # 每克营养素的热量值（大卡/克）
+    CALORIES_PER_GRAM_CARB = 4.0
+    CALORIES_PER_GRAM_PROTEIN = 4.0
+    CALORIES_PER_GRAM_FAT = 9.0
+    
+    # 碳水化合物调整相关
+    CARB_ADJUSTMENT_UNIT_G = 30  # 每个调整单位30克
+
 
 @dataclass
 class NutritionDistribution:
@@ -28,20 +47,15 @@ def calculate_nutrition(tdee: float) -> NutritionDistribution:
     Raises:
         ValueError: 如果TDEE不是正数
     """
-    if tdee <= 0:
-        raise ValueError(f"TDEE必须为正数，当前值：{tdee}")
+    validate_positive(tdee, "TDEE")
 
-    carb_ratio = 0.5  # 50% 碳水化合物
-    protein_ratio = 0.3  # 30% 蛋白质
-    fat_ratio = 0.2  # 20% 脂肪
+    carb_calories = tdee * NutritionConstants.CARBOHYDRATE_RATIO
+    protein_calories = tdee * NutritionConstants.PROTEIN_RATIO
+    fat_calories = tdee * NutritionConstants.FAT_RATIO
 
-    carb_calories = tdee * carb_ratio
-    protein_calories = tdee * protein_ratio
-    fat_calories = tdee * fat_ratio
-
-    carb_grams = carb_calories / 4  # 4大卡/克
-    protein_grams = protein_calories / 4  # 4大卡/克
-    fat_grams = fat_calories / 9  # 9大卡/克
+    carb_grams = carb_calories / NutritionConstants.CALORIES_PER_GRAM_CARB
+    protein_grams = protein_calories / NutritionConstants.CALORIES_PER_GRAM_PROTEIN
+    fat_grams = fat_calories / NutritionConstants.CALORIES_PER_GRAM_FAT
 
     return NutritionDistribution(
         carbohydrates_g=round(carb_grams, 2),
@@ -64,7 +78,7 @@ def adjust_carbohydrates(base_carb_g: float, adjustment_units: int) -> float:
     Raises:
         ValueError: 如果调整后结果为负数
     """
-    adjustment_g = adjustment_units * 30
+    adjustment_g = adjustment_units * NutritionConstants.CARB_ADJUSTMENT_UNIT_G
     adjusted = base_carb_g + adjustment_g
 
     if adjusted < 0:

@@ -3,7 +3,7 @@
 from datetime import date
 import pytest
 
-from src.fatloss.models.weight_record import WeightRecord
+from fatloss.models.weight_record import WeightRecord
 
 
 class TestWeightRecord:
@@ -100,7 +100,7 @@ class TestWeightRecord:
         """测试记录日期验证"""
         # 今天日期
         from unittest.mock import patch
-        with patch("src.fatloss.models.weight_record.date") as mock_date:
+        with patch("fatloss.models.weight_record.date") as mock_date:
             mock_date.today.return_value = date(2024, 1, 10)
             mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
             
@@ -120,7 +120,7 @@ class TestWeightRecord:
         assert record.record_date == date(2023, 12, 31)
         
         # 未来日期应引发错误
-        with patch("src.fatloss.models.weight_record.date") as mock_date:
+        with patch("fatloss.models.weight_record.date") as mock_date:
             mock_date.today.return_value = date(2024, 1, 10)
             mock_date.side_effect = lambda *args, **kw: date(*args, **kw)
             

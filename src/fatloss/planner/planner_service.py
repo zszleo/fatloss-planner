@@ -7,21 +7,22 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import List, Optional, Tuple
 
-from src.fatloss.calculator.bmr_calculator import Gender, calculate_bmr
-from src.fatloss.calculator.nutrition_calculator import (
+from fatloss.models.enums import Gender, ActivityLevel
+from fatloss.calculator.bmr_calculator import calculate_bmr
+from fatloss.calculator.nutrition_calculator import (
     adjust_carbohydrates,
     calculate_nutrition,
 )
-from src.fatloss.calculator.tdee_calculator import calculate_tdee
-from src.fatloss.calculator.time_predictor import (
+from fatloss.calculator.tdee_calculator import calculate_tdee
+from fatloss.calculator.time_predictor import (
     calculate_weekly_adjustment,
     predict_weight_loss_time,
 )
-from src.fatloss.models.app_config import AppConfig
-from src.fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
-from src.fatloss.models.user_profile import UserProfile
-from src.fatloss.models.weight_record import WeightRecord
-from src.fatloss.repository.unit_of_work import unit_of_work
+from fatloss.models.app_config import AppConfig
+from fatloss.models.nutrition_plan import DailyNutritionPlan, WeeklyNutritionPlan
+from fatloss.models.user_profile import UserProfile
+from fatloss.models.weight_record import WeightRecord
+from fatloss.repository.unit_of_work import unit_of_work
 
 
 @dataclass
@@ -50,7 +51,7 @@ class WeightLossProgress:
 class PlannerService:
     """Planner业务服务类"""
 
-    def __init__(self, database_url: str = None):
+    def __init__(self, database_url: str | None = None):
         """初始化Planner服务。
 
         Args:
@@ -65,7 +66,7 @@ class PlannerService:
         birth_date: date,
         height_cm: float,
         initial_weight_kg: float,
-        activity_level: str = "moderate",
+        activity_level: ActivityLevel = ActivityLevel.MODERATE,
     ) -> UserProfile:
         """创建用户档案。
 
