@@ -185,12 +185,12 @@ class TestUserRepositoryIntegration:
         repository.create(female_user)
 
         # 查找男性用户
-        male_users = repository.find_by_gender("male")
+        male_users = repository.find_by_gender("男")
         assert len(male_users) == 1
         assert male_users[0].name == "男性用户"
 
         # 查找女性用户
-        female_users = repository.find_by_gender("female")
+        female_users = repository.find_by_gender("女")
         assert len(female_users) == 1
         assert female_users[0].name == "女性用户"
 

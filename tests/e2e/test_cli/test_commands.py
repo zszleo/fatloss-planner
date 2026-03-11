@@ -17,7 +17,7 @@ def test_calculate_command():
             "--weight", "70",
             "--height", "175",
             "--age", "30",
-            "--gender", "male",
+            "--gender", "男",
             "--exercise", "60",
         ],
     )
@@ -40,7 +40,7 @@ def test_calculate_command_invalid_input():
             "--weight", "10",  # 低于最小值
             "--height", "175",
             "--age", "30",
-            "--gender", "male",
+            "--gender", "男",
         ],
     )
     
@@ -59,11 +59,11 @@ def test_plan_daily_command():
             "plan",
             "daily",
             "--name", "测试用户CLI",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1990-01-01",
             "--height", "175",
             "--weight", "70",
-            "--activity-level", "moderate",
+            "--activity-level", "中度活动",
             "--plan-date", "2026-03-12",  # 未来日期
             "--exercise", "60",
             "--adjustment", "0",
@@ -86,11 +86,11 @@ def test_plan_weekly_command():
             "plan",
             "daily",
             "--name", "测试用户周计划",
-            "--gender", "female",
+            "--gender", "女",
             "--birth-date", "1995-05-05",
             "--height", "165",
             "--weight", "60",
-            "--activity-level", "moderate",
+            "--activity-level", "中度活动",
             "--plan-date", "2026-03-20",
             "--exercise", "45",
         ],

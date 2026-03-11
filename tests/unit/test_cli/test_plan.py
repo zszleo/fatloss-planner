@@ -151,7 +151,7 @@ class TestPlanCommand:
         # 缺少--name参数
         result = runner.invoke(cli, [
             "plan", "daily",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1995-01-01",
             "--height", "175",
             "--weight", "70",
@@ -196,7 +196,7 @@ class TestPlanCommand:
         result = runner.invoke(cli, [
             "plan", "daily",
             "--name", "测试用户",
-            "--gender", "male",
+            "--gender", "男",
             "--height", "175",
             "--weight", "70",
             "--plan-date", "2026-03-12"
@@ -217,7 +217,7 @@ class TestPlanCommand:
         result = runner.invoke(cli, [
             "plan", "daily",
             "--name", "测试用户",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1995-01-01",
             "--weight", "70",
             "--plan-date", "2026-03-12"
@@ -238,7 +238,7 @@ class TestPlanCommand:
         result = runner.invoke(cli, [
             "plan", "daily",
             "--name", "测试用户",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1995-01-01",
             "--height", "175",
             "--plan-date", "2026-03-12"

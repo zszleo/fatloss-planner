@@ -245,7 +245,7 @@ class TestUserProfile:
         json_data = user.model_dump_json()
         assert '"id":1' in json_data
         assert '"name":"张三"' in json_data
-        assert '"gender":"male"' in json_data
+        assert '"gender":"男"' in json_data
         assert '"birth_date":"1990-01-01"' in json_data
         assert '"height_cm":175.0' in json_data
         assert '"initial_weight_kg":70.0' in json_data

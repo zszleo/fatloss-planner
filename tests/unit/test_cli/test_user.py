@@ -50,33 +50,33 @@ class TestUserCommand:
         mock_user_profile = Mock()
         mock_user_profile.id = 123
         mock_user_profile.name = "张三"
-        mock_user_profile.gender = "male"
+        mock_user_profile.gender = "男"
         mock_user_profile.age = 30
         mock_user_profile.height_cm = 175.0
         mock_user_profile.initial_weight_kg = 70.0
-        mock_user_profile.activity_level = "moderate"
+        mock_user_profile.activity_level = "中度活动"
         mock_planner.create_user_profile.return_value = mock_user_profile
         mock_planner_class.return_value = mock_planner
 
         result = runner.invoke(cli, [
             "user", "create",
             "--name", "张三",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1995-01-01",
             "--height", "175",
             "--weight", "70",
-            "--activity-level", "moderate"
+            "--activity-level", "中度活动"
         ])
 
         assert result.exit_code == 0
         assert "✅ 用户创建成功！" in result.output
         assert "用户ID: 123" in result.output
         assert "姓名: 张三" in result.output
-        assert "性别: male" in result.output
+        assert "性别: 男" in result.output
         assert "年龄: 30 岁" in result.output
         assert "身高: 175.0 cm" in result.output
         assert "初始体重: 70.0 kg" in result.output
-        assert "活动水平: moderate" in result.output
+        assert "活动水平: 中度活动" in result.output
         
         # 验证create_user_profile调用
         mock_planner.create_user_profile.assert_called_once()
@@ -84,7 +84,7 @@ class TestUserCommand:
         assert call_args.kwargs["name"] == "张三"
         assert call_args.kwargs["height_cm"] == 175.0
         assert call_args.kwargs["initial_weight_kg"] == 70.0
-        assert call_args.kwargs["activity_level"] == "moderate"
+        assert call_args.kwargs["activity_level"] == "中度活动"
         # 检查gender枚举转换
         from fatloss.calculator.bmr_calculator import Gender
         assert call_args.kwargs["gender"] == Gender.MALE
@@ -99,26 +99,26 @@ class TestUserCommand:
         mock_user_profile = Mock()
         mock_user_profile.id = 124
         mock_user_profile.name = "李四"
-        mock_user_profile.gender = "female"
+        mock_user_profile.gender = "女"
         mock_user_profile.age = 25
         mock_user_profile.height_cm = 165.0
         mock_user_profile.initial_weight_kg = 60.0
-        mock_user_profile.activity_level = "active"
+        mock_user_profile.activity_level = "活跃"
         mock_planner.create_user_profile.return_value = mock_user_profile
         mock_planner_class.return_value = mock_planner
 
         result = runner.invoke(cli, [
             "user", "create",
             "--name", "李四",
-            "--gender", "female",
+            "--gender", "女",
             "--birth-date", "2000-05-15",
             "--height", "165",
             "--weight", "60",
-            "--activity-level", "active"
+            "--activity-level", "活跃"
         ])
 
         assert result.exit_code == 0
-        assert "性别: female" in result.output
+        assert "性别: 女" in result.output
         # 验证gender枚举转换
         from fatloss.calculator.bmr_calculator import Gender
         mock_planner.create_user_profile.assert_called_once()
@@ -135,11 +135,11 @@ class TestUserCommand:
         result = runner.invoke(cli, [
             "user", "create",
             "--name", "张三",
-            "--gender", "male",
+            "--gender", "男",
             "--birth-date", "1995-01-01",
             "--height", "300",  # 无效身高
             "--weight", "70",
-            "--activity-level", "moderate"
+            "--activity-level", "中度活动"
         ])
 
         assert result.exit_code != 0
@@ -176,13 +176,13 @@ class TestUserCommand:
         mock_user1 = Mock()
         mock_user1.id = 1
         mock_user1.name = "张三"
-        mock_user1.gender = "male"
+        mock_user1.gender = "男"
         mock_user1.age = 30
         
         mock_user2 = Mock()
         mock_user2.id = 2
         mock_user2.name = "李四"
-        mock_user2.gender = "female"
+        mock_user2.gender = "女"
         mock_user2.age = 25
         
         # 模拟体重记录
@@ -252,12 +252,12 @@ class TestUserCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "张三"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1995, 1, 1)
         mock_user.age = 30
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         mock_user.created_at = "2026-03-11 10:00:00"
         
         # 模拟体重记录
@@ -281,12 +281,12 @@ class TestUserCommand:
         assert "👤 用户详情" in result.output
         assert "姓名: 张三" in result.output
         assert "用户ID: 1" in result.output
-        assert "性别: male" in result.output
+        assert "性别: 男" in result.output
         assert "出生日期: 1995-01-01" in result.output
         assert "年龄: 30 岁" in result.output
         assert "身高: 175.0 cm" in result.output
         assert "初始体重: 70.0 kg" in result.output
-        assert "活动水平: moderate" in result.output
+        assert "活动水平: 中度活动" in result.output
         assert "创建时间: 2026-03-11 10:00:00" in result.output
         assert "统计数据" in result.output
         assert "最新体重: 69.5 kg (2026-03-11)" in result.output
@@ -320,12 +320,12 @@ class TestUserCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "张三"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1995, 1, 1)
         mock_user.age = 30
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         mock_user.created_at = "2026-03-11 10:00:00"
         
         mock_uow_context = Mock()

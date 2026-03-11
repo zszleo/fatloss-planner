@@ -47,10 +47,10 @@ class TestMapper:
     def test_to_sqlalchemy_gender_with_string(self):
         """测试to_sqlalchemy_gender函数接受字符串输入"""
         # 测试字符串输入（注意：枚举值是小写）
-        result = to_sqlalchemy_gender("male")
+        result = to_sqlalchemy_gender("男")
         assert result == GenderEnum.MALE
         
-        result = to_sqlalchemy_gender("female")
+        result = to_sqlalchemy_gender("女")
         assert result == GenderEnum.FEMALE
         
         # 测试枚举输入

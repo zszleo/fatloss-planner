@@ -8,7 +8,7 @@ from sqlalchemy import bindparam
 from sqlalchemy.orm import Session
 
 from fatloss.models.user_profile import UserProfile
-from fatloss.repository.mapper import user_profile_from_model, user_profile_to_model
+from fatloss.repository.mapper import user_profile_from_model, user_profile_to_model, to_sqlalchemy_gender
 from fatloss.repository.models import UserProfileModel
 from fatloss.repository.sqlalchemy_repository import SQLAlchemyFilterableRepository
 
@@ -55,12 +55,14 @@ class UserRepository(
         """根据性别查找用户。
 
         Args:
-            gender: 性别（"male"或"female"）
+            gender: 性别（"男"或"女"）
 
         Returns:
             用户列表
         """
-        return self.find_by_filter(gender=gender)
+        # 将中文性别转换为数据库枚举
+        gender_enum = to_sqlalchemy_gender(gender)
+        return self.find_by_filter(gender=gender_enum)
 
     def find_by_age_range(self, min_age: int, max_age: int) -> list[UserProfile]:
         """根据年龄范围查找用户。

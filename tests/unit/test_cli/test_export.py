@@ -39,19 +39,19 @@ class TestExportCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "测试用户"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1990, 1, 1)
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         mock_user.model_dump.return_value = {
             "id": 1,
             "name": "测试用户",
-            "gender": "male",
+            "gender": "男",
             "birth_date": "1990-01-01",
             "height_cm": 175.0,
             "initial_weight_kg": 70.0,
-            "activity_level": "moderate"
+            "activity_level": "中度活动"
         }
         
         # 模拟配置对象（不存在）
@@ -272,11 +272,11 @@ class TestExportCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "测试用户"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1990, 1, 1)
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         
         # 模拟配置对象
         mock_config = Mock()
@@ -326,11 +326,11 @@ class TestExportCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "测试用户"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1990, 1, 1)
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         
         # 模拟配置对象
         mock_config = Mock()
@@ -372,11 +372,11 @@ class TestExportCommand:
         mock_user = Mock()
         mock_user.id = 1
         mock_user.name = "测试用户"
-        mock_user.gender = "male"
+        mock_user.gender = "男"
         mock_user.birth_date = date(1990, 1, 1)
         mock_user.height_cm = 175.0
         mock_user.initial_weight_kg = 70.0
-        mock_user.activity_level = "moderate"
+        mock_user.activity_level = "中度活动"
         
         # 模拟配置对象
         mock_config = Mock()
