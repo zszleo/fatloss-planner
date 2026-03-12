@@ -4,7 +4,7 @@
 """
 
 from contextlib import contextmanager
-from typing import Generator
+from typing import Generator, Optional
 
 from sqlalchemy.orm import Session
 
@@ -56,7 +56,7 @@ class UnitOfWork:
 
 @contextmanager
 def unit_of_work(
-    database_url: str = None, session: Session = None
+    database_url: Optional[str] = None, session: Optional[Session] = None
 ) -> Generator[UnitOfWork, None, None]:
     """工作单元上下文管理器。
 
@@ -99,7 +99,7 @@ class DatabaseContext:
     这是UnitOfWork的简化版本，适合简单场景。
     """
 
-    def __init__(self, database_url: str = None):
+    def __init__(self, database_url: Optional[str] = None):
         """初始化数据库上下文。
 
         Args:

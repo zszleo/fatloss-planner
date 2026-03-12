@@ -34,6 +34,9 @@ web = [
 ]
 desktop = [
     "PyQt5>=5.15.0",
+    "matplotlib>=3.7.0",  # 数据可视化
+    "pandas>=2.0.0",      # 数据处理和图表
+    "pyqtgraph>=0.13.0",  # 高性能绘图（可选）
 ]
 dev = [
     "pytest>=7.0.0",
