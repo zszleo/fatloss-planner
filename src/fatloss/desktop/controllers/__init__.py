@@ -8,5 +8,15 @@ from fatloss.desktop.controllers.user_controller import UserController
 from fatloss.desktop.controllers.nutrition_controller import NutritionController
 from fatloss.desktop.controllers.weight_controller import WeightController
 from fatloss.desktop.controllers.dashboard_controller import DashboardController
+from fatloss.desktop.controllers.plan_controller import PlanController
+from fatloss.desktop.controllers.settings_controller import SettingsController
 
-__all__ = ["MainController", "UserController", "NutritionController", "WeightController", "DashboardController"]
+__all__ = [
+    "MainController", 
+    "UserController", 
+    "NutritionController", 
+    "WeightController", 
+    "DashboardController",
+    "PlanController",
+    "SettingsController"
+]

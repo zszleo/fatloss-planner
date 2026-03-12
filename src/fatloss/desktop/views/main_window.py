@@ -23,10 +23,14 @@ from fatloss.desktop.controllers.user_controller import UserController
 from fatloss.desktop.controllers.nutrition_controller import NutritionController
 from fatloss.desktop.controllers.weight_controller import WeightController
 from fatloss.desktop.controllers.dashboard_controller import DashboardController
+from fatloss.desktop.controllers.plan_controller import PlanController
+from fatloss.desktop.controllers.settings_controller import SettingsController
 from fatloss.desktop.views.widgets.user_management_tab import UserManagementTab
 from fatloss.desktop.views.widgets.nutrition_calculator_tab import NutritionCalculatorTab
 from fatloss.desktop.views.widgets.weight_tracking_tab import WeightTrackingTab
 from fatloss.desktop.views.widgets.dashboard_tab import DashboardTab
+from fatloss.desktop.views.widgets.plan_management_tab import PlanManagementTab
+from fatloss.desktop.views.widgets.settings_tab import SettingsTab
 
 
 class MainWindow(QMainWindow):
@@ -44,6 +48,8 @@ class MainWindow(QMainWindow):
         self.nutrition_controller = NutritionController(controller.planner_service)
         self.weight_controller = WeightController(controller.planner_service)
         self.dashboard_controller = DashboardController(controller.planner_service)
+        self.plan_controller = PlanController(controller.planner_service)
+        self.settings_controller = SettingsController(controller.planner_service)
         
         # 窗口属性
         self.setWindowTitle("Fatloss Planner - 科学减脂计划工具")
@@ -58,7 +64,7 @@ class MainWindow(QMainWindow):
         self._create_menu_bar()
         
         # 创建工具栏
-        self._create_tool_bar()
+        # self._create_tool_bar()
         
         # 创建状态栏
         self._create_status_bar()
@@ -115,22 +121,22 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
         
-    def _create_tool_bar(self) -> None:
-        """创建工具栏。"""
-        toolbar = QToolBar("主工具栏")
-        toolbar.setMovable(False)
-        self.addToolBar(toolbar)
+    # def _create_tool_bar(self) -> None:
+    #     """创建工具栏。"""
+    #     toolbar = QToolBar("主工具栏")
+    #     toolbar.setMovable(False)
+    #     self.addToolBar(toolbar)
         
-        # 添加工具按钮（占位符）
-        new_user_btn = QAction("新建用户", self)
-        new_user_btn.triggered.connect(self._on_new_user)
-        toolbar.addAction(new_user_btn)
+    #     # 添加工具按钮（占位符）
+    #     new_user_btn = QAction("新建用户", self)
+    #     new_user_btn.triggered.connect(self._on_new_user)
+    #     toolbar.addAction(new_user_btn)
         
-        toolbar.addSeparator()
+    #     toolbar.addSeparator()
         
-        calculate_btn = QAction("营养计算", self)
-        calculate_btn.triggered.connect(self._on_calculate_nutrition)
-        toolbar.addAction(calculate_btn)
+    #     calculate_btn = QAction("营养计算", self)
+    #     calculate_btn.triggered.connect(self._on_calculate_nutrition)
+    #     toolbar.addAction(calculate_btn)
         
     def _create_status_bar(self) -> None:
         """创建状态栏。"""
@@ -173,10 +179,7 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(nutrition_tab, "营养计算")
         
         # 计划管理标签页
-        plan_tab = QWidget()
-        plan_layout = QVBoxLayout()
-        plan_layout.addWidget(QLabel("<h2>计划管理</h2><p>生成和管理周营养计划。</p><p>功能将在阶段2实现。</p>"))
-        plan_tab.setLayout(plan_layout)
+        plan_tab = PlanManagementTab(self.plan_controller)
         self.tab_widget.addTab(plan_tab, "计划管理")
         
         # 体重跟踪标签页
@@ -184,24 +187,37 @@ class MainWindow(QMainWindow):
         self.tab_widget.addTab(weight_tab, "体重跟踪")
         
         # 配置设置标签页
-        settings_tab = QWidget()
-        settings_layout = QVBoxLayout()
-        settings_layout.addWidget(QLabel("<h2>配置设置</h2><p>配置营养比例、调整策略和界面主题。</p><p>功能将在阶段2实现。</p>"))
-        settings_tab.setLayout(settings_layout)
+        settings_tab = SettingsTab(self.settings_controller)
         self.tab_widget.addTab(settings_tab, "配置设置")
         
     # 事件处理函数
     def _on_new_user(self) -> None:
         """处理新建用户操作。"""
-        QMessageBox.information(self, "功能提示", "新建用户功能将在阶段2实现。")
+        # 切换到用户管理标签页
+        for i in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(i) == "用户管理":
+                self.tab_widget.setCurrentIndex(i)
+                # 触发用户管理标签页的新建用户功能
+                current_widget = self.tab_widget.widget(i)
+                if hasattr(current_widget, 'show_new_user_dialog'):
+                    current_widget.show_new_user_dialog()
+                break
         
     def _on_calculate_nutrition(self) -> None:
         """处理营养计算操作。"""
-        QMessageBox.information(self, "功能提示", "营养计算功能将在阶段2实现。")
+        # 切换到营养计算标签页
+        for i in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(i) == "营养计算":
+                self.tab_widget.setCurrentIndex(i)
+                break
         
     def _on_preferences(self) -> None:
         """处理首选项操作。"""
-        QMessageBox.information(self, "功能提示", "首选项功能将在阶段3实现。")
+        # 切换到配置设置标签页
+        for i in range(self.tab_widget.count()):
+            if self.tab_widget.tabText(i) == "配置设置":
+                self.tab_widget.setCurrentIndex(i)
+                break
         
     def _on_database_management(self) -> None:
         """处理数据库管理操作。"""

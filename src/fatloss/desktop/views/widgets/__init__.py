@@ -7,5 +7,14 @@ from .user_management_tab import UserManagementTab
 from .nutrition_calculator_tab import NutritionCalculatorTab
 from .weight_tracking_tab import WeightTrackingTab
 from .dashboard_tab import DashboardTab
+from .plan_management_tab import PlanManagementTab
+from .settings_tab import SettingsTab
 
-__all__ = ["UserManagementTab", "NutritionCalculatorTab", "WeightTrackingTab", "DashboardTab"]
+__all__ = [
+    "UserManagementTab", 
+    "NutritionCalculatorTab", 
+    "WeightTrackingTab", 
+    "DashboardTab",
+    "PlanManagementTab",
+    "SettingsTab"
+]
