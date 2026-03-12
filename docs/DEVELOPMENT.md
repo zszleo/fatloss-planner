@@ -1,10 +1,10 @@
 # Fatloss Planner 开发文档
 
-## 项目状态 (更新于2026-03-11)
+## 项目状态 (更新于2026-03-12)
 
-### 🎉 所有核心阶段已完成
+### 🎉 核心阶段完成状态
 
-#### ✅ Phase 1: 核心计算引擎
+#### ✅ Phase 1: 核心计算引擎（已完成）
 - **BMR计算**: Mifflin-St Jeor公式实现，支持性别、年龄、体重、身高参数
 - **TDEE计算**: 基础代谢 + 训练消耗（训练分钟数×10）
 - **营养分配**: 5:3:2比例（碳水:蛋白质:脂肪），支持热量系数转换（4/4/9）
@@ -12,7 +12,7 @@
 - **数据模型**: Pydantic V2模型（UserProfile, WeightRecord, NutritionPlan, AppConfig）
 - **单元测试**: 37个单元测试，覆盖率100%
 
-#### ✅ Phase 2: 存储层与业务服务层
+#### ✅ Phase 2: 存储层与业务服务层（已完成）
 - **Repository抽象层**: BaseRepository、FilterableRepository、DateRangeRepository接口
 - **SQLAlchemy ORM模型**: 完整的数据库表结构定义
 - **映射器模块**: Pydantic与SQLAlchemy模型双向自动转换
@@ -21,16 +21,26 @@
 - **Planner业务服务**: PlannerService整合计算引擎与存储层
 - **集成测试**: 17个集成测试，数据库操作验证
 
-#### ✅ Phase 3: CLI命令行接口
+#### ✅ Phase 3: CLI命令行接口（已完成）
 - **7个核心命令**: `calculate`, `plan`, `adjust`, `config`, `export`, `user`, `weight`
 - **完整功能覆盖**: 热量计算、计划生成、营养调整、配置管理、数据导出、用户管理、体重记录
 - **CLI测试**: 98个CLI测试，覆盖所有命令和参数组合
 - **用户友好界面**: 详细的帮助信息、参数验证、友好的输出格式
 - **数据库集成**: 所有命令与数据库无缝集成，支持事务管理
 
+#### 🔄 Phase 4: PyQt5桌面界面（进行中）
+- **阶段1完成**: 基础框架搭建（2026-03-12）
+- **桌面模块**: 完整目录结构（controllers/, views/, models/, utils/等）
+- **主窗口框架**: QMainWindow实现，包含菜单栏、状态栏、标签页
+- **应用启动器**: QApplication配置和跨平台字体设置
+- **控制器**: MainController封装PlannerService业务逻辑
+- **错误处理**: 统一的ErrorHandler类
+- **数据库兼容**: 与CLI共享SQLite数据库，支持数据迁移
+
 ### 📊 质量指标
-- **总测试数**: 273个测试全部通过
-- **测试覆盖率**: 99.37% (远超80%质量要求)
+- **总测试数**: 297个测试全部通过
+- **核心模块覆盖率**: >95% (计算引擎、数据模型、存储层、业务服务层、CLI)
+- **整体测试覆盖率**: 27.05% (因包含8780行未测试桌面UI代码)
 - **代码质量**: 通过black、isort、pylint、mypy检查
 - **架构验证**: 分层架构清晰，设计模式应用正确
 
@@ -93,23 +103,41 @@ fatloss-planner/
 │   ├── planner/           # 业务逻辑层
 │   │   ├── planner_service.py    # Planner业务服务
 │   │   └── __init__.py
-│   ├── cli/               # CLI接口（待实现）
-│   ├── api/               # API服务（待实现）
-│   └── utils/             # 工具函数（待实现）
-├── tests/                 # 测试套件
+│   ├── cli/               # CLI接口（已完成）
+│   │   ├── main.py              # CLI入口点
+│   │   ├── commands/            # 所有命令实现
+│   │   │   ├── calculate.py    # 热量计算命令
+│   │   │   ├── plan.py         # 计划生成命令
+│   │   │   ├── adjust.py       # 营养调整命令
+│   │   │   ├── config.py       # 配置管理命令
+│   │   │   ├── export.py       # 数据导出命令
+│   │   │   ├── user.py         # 用户管理命令
+│   │   │   └── weight.py       # 体重记录命令
+│   │   └── utils/              # CLI工具函数
+│   ├── desktop/           # PyQt5桌面界面（进行中）
+│   │   ├── main.py            # 应用入口点
+│   │   ├── controllers/       # 控制器模块
+│   │   ├── views/            # 视图模块
+│   │   ├── models/           # Qt数据模型
+│   │   ├── utils/            # 工具函数
+│   │   └── resources/        # 资源文件
+│   ├── api/               # API服务（可选扩展）
+│   └── utils/             # 工具函数（已完成）
+│       └── validation.py      # 数据验证工具
+├── tests/                 # 测试套件（297个测试）
 │   ├── unit/              # 单元测试
-│   │   └── test_calculator/
-│   │       ├── test_bmr_calculator.py
-│   │       ├── test_tdee_calculator.py
-│   │       ├── test_nutrition_calculator.py
-│   │       └── test_time_predictor.py
+│   │   ├── test_calculator/      # 计算引擎测试
+│   │   ├── test_models/          # 数据模型测试
+│   │   ├── test_repository/      # Repository测试
+│   │   ├── test_cli/             # CLI命令测试（98个测试）
+│   │   └── test_utils/           # 工具函数测试
 │   ├── integration/       # 集成测试
-│   │   └── test_repository/
-│   │       ├── test_user_repository.py
-│   │       └── test_weight_repository.py
-│   └── e2e/              # 端到端测试（待实现）
+│   │   ├── test_repository/     # Repository集成测试
+│   │   └── test_database/       # 数据库集成测试
+│   └── e2e/              # 端到端测试（部分实现）
 ├── docs/                  # 文档
-├── scripts/              # 脚本（待实现）
+├── scripts/              # 脚本（已完成）
+│   └── init_db.py         # 数据库初始化CLI工具（fatloss-db）
 ├── data/                 # 数据文件
 ├── pyproject.toml        # 项目配置和依赖
 ├── 实施计划.md           # 项目计划和进度
@@ -292,33 +320,58 @@ mypy src/
    git commit -m "feat: 添加新功能"
    ```
 
-## 下一步开发任务
+## 当前开发状态与下一步计划
 
-### Phase 2收尾 - 技术债务清理
-1. ✅ 解决依赖安装问题 - **已完成**
-2. ✅ 运行完整测试套件验证实现 - **已完成**（单元测试覆盖率100%）
-3. ✅ 创建数据库初始化脚本 - **已完成**（提供完整CLI工具）
-4. ✅ 迁移Pydantic V1到V2 - **已完成**（已迁移4个模型文件中的10处V1代码）
-5. ✅ 统一数据库路径配置 - **已完成**（更新DEFAULT_DATABASE_URL为sqlite:///./data/fatloss.db）
-6. ✅ 验证完整开发工具链 - **已完成**（mypy可用，git仓库已初始化）
+### ✅ Phase 1-3 已完成验收
+所有核心功能已实现并通过测试，CLI版本已具备生产就绪状态。
 
-### Phase 3: CLI接口（预计3天）
-- 实现CLI命令结构
-- 添加用户管理命令
-- 添加体重记录命令
-- 添加营养计划生成命令
-- 添加进度查看命令
+### 🔄 Phase 4: PyQt5桌面界面（进行中）
+**当前进度**：阶段1（基础框架搭建）已完成（2026-03-12）
 
-### Phase 4: API服务（预计3天）
-- 实现FastAPI应用
-- 创建RESTful API端点
-- 添加API文档
-- 实现认证和授权
+#### 已完成的工作：
+1. ✅ **PyQt5环境配置和依赖安装**
+2. ✅ **主窗口框架和基本布局**
+3. ✅ **应用启动器和配置管理**
+4. ✅ **基础控制器和错误处理**
+5. ✅ **数据库兼容性设计**
 
-### Phase 5: Web界面（预计2天）
-- 创建简单的Web界面
-- 实现数据可视化
-- 添加响应式设计
+#### 下一步开发任务（Phase 4阶段2）：
+1. **用户管理模块开发**（预计10小时）
+   - 用户档案列表界面（QTableView）
+   - 新建/编辑用户表单
+   - 用户详情查看面板
+   
+2. **营养计算模块开发**（预计8小时）
+   - BMR/TDEE计算器界面
+   - 营养素分配计算和展示
+   - 训练时间调整滑块
+
+3. **体重跟踪模块开发**（预计10小时）
+   - 体重记录表格
+   - 体重趋势图表（matplotlib集成）
+   - 目标进度可视化
+
+4. **仪表盘模块开发**（预计12小时）
+   - 关键指标概览面板
+   - 营养分配饼图展示
+   - 进度报告和统计信息
+
+### 📅 后续可选扩展计划
+1. **Phase 5: API服务**（可选，预计3天）
+   - FastAPI应用实现
+   - RESTful API端点
+   - OpenAPI文档生成
+
+2. **Phase 6: Web界面**（可选，预计2天）
+   - 响应式Web界面
+   - 数据可视化图表
+   - 移动设备支持
+
+### 🎯 近期优先任务
+1. 完成Phase 4阶段2的核心功能模块
+2. 添加桌面UI测试（pytest-qt）
+3. 优化用户体验和界面设计
+4. 准备多平台打包配置（PyInstaller）
 
 ## 故障排除
 
