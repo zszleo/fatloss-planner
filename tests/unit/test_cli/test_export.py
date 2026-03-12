@@ -123,7 +123,7 @@ class TestExportCommand:
         mock_uow = Mock()
         mock_uow.users.get_by_id.return_value = mock_user
         mock_uow.app_configs.get_by_user_id.return_value = mock_config
-        mock_uow.weights.find_all_by_user_id.return_value = [
+        mock_uow.weights.find_by_user_id.return_value = [
             mock_weight_record1, mock_weight_record2
         ]
         mock_unit_of_work.return_value.__enter__.return_value = mock_uow
@@ -145,10 +145,10 @@ class TestExportCommand:
         assert "体重记录: 2 条" in result.output
         
         # 验证调用
-        mock_uow.weights.find_all_by_user_id.assert_called_once_with(1)
+        mock_uow.weights.find_by_user_id.assert_called_once_with(1)
         # 不应该调用营养计划相关方法
-        assert not mock_uow.daily_nutrition.find_all_by_user_id.called
-        assert not mock_uow.weekly_nutrition.find_all_by_user_id.called
+        assert not mock_uow.daily_nutrition.find_by_user_id.called
+        assert not mock_uow.weekly_nutrition.find_by_user_id.called
 
     @patch('fatloss.cli.commands.export.PlannerService')
     @patch('fatloss.cli.commands.export.unit_of_work')
@@ -178,8 +178,8 @@ class TestExportCommand:
         mock_uow = Mock()
         mock_uow.users.get_by_id.return_value = mock_user
         mock_uow.app_configs.get_by_user_id.return_value = mock_config
-        mock_uow.daily_nutrition.find_all_by_user_id.return_value = [mock_daily_plan]
-        mock_uow.weekly_nutrition.find_all_by_user_id.return_value = [mock_weekly_plan]
+        mock_uow.daily_nutrition.find_by_user_id.return_value = [mock_daily_plan]
+        mock_uow.weekly_nutrition.find_by_user_id.return_value = [mock_weekly_plan]
         mock_unit_of_work.return_value.__enter__.return_value = mock_uow
         
         # 设置临时输出文件
@@ -200,10 +200,10 @@ class TestExportCommand:
         assert "每周营养计划: 1 条" in result.output
         
         # 验证调用
-        mock_uow.daily_nutrition.find_all_by_user_id.assert_called_once_with(1)
-        mock_uow.weekly_nutrition.find_all_by_user_id.assert_called_once_with(1)
+        mock_uow.daily_nutrition.find_by_user_id.assert_called_once_with(1)
+        mock_uow.weekly_nutrition.find_by_user_id.assert_called_once_with(1)
         # 不应该调用体重记录相关方法
-        assert not mock_uow.weights.find_all_by_user_id.called
+        assert not mock_uow.weights.find_by_user_id.called
 
     @patch('fatloss.cli.commands.export.PlannerService')
     @patch('fatloss.cli.commands.export.unit_of_work')
@@ -235,9 +235,9 @@ class TestExportCommand:
         mock_uow = Mock()
         mock_uow.users.get_by_id.return_value = mock_user
         mock_uow.app_configs.get_by_user_id.return_value = mock_config
-        mock_uow.weights.find_all_by_user_id.return_value = [mock_weight_record]
-        mock_uow.daily_nutrition.find_all_by_user_id.return_value = [mock_daily_plan]
-        mock_uow.weekly_nutrition.find_all_by_user_id.return_value = [mock_weekly_plan]
+        mock_uow.weights.find_by_user_id.return_value = [mock_weight_record]
+        mock_uow.daily_nutrition.find_by_user_id.return_value = [mock_daily_plan]
+        mock_uow.weekly_nutrition.find_by_user_id.return_value = [mock_weekly_plan]
         mock_unit_of_work.return_value.__enter__.return_value = mock_uow
         
         # 设置临时输出文件
@@ -294,7 +294,7 @@ class TestExportCommand:
         mock_uow = Mock()
         mock_uow.users.get_by_id.return_value = mock_user
         mock_uow.app_configs.get_by_user_id.return_value = mock_config
-        mock_uow.weights.find_all_by_user_id.return_value = [mock_weight_record]
+        mock_uow.weights.find_by_user_id.return_value = [mock_weight_record]
         mock_unit_of_work.return_value.__enter__.return_value = mock_uow
         
         # 设置临时输出文件
@@ -340,7 +340,7 @@ class TestExportCommand:
         mock_uow = Mock()
         mock_uow.users.get_by_id.return_value = mock_user
         mock_uow.app_configs.get_by_user_id.return_value = mock_config
-        mock_uow.weights.find_all_by_user_id.return_value = []  # 空体重记录
+        mock_uow.weights.find_by_user_id.return_value = []  # 空体重记录
         mock_unit_of_work.return_value.__enter__.return_value = mock_uow
         
         # 设置临时输出文件

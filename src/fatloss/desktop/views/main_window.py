@@ -63,9 +63,6 @@ class MainWindow(QMainWindow):
         # 创建菜单栏
         self._create_menu_bar()
         
-        # 创建工具栏
-        # self._create_tool_bar()
-        
         # 创建状态栏
         self._create_status_bar()
         
@@ -121,23 +118,6 @@ class MainWindow(QMainWindow):
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
         
-    # def _create_tool_bar(self) -> None:
-    #     """创建工具栏。"""
-    #     toolbar = QToolBar("主工具栏")
-    #     toolbar.setMovable(False)
-    #     self.addToolBar(toolbar)
-        
-    #     # 添加工具按钮（占位符）
-    #     new_user_btn = QAction("新建用户", self)
-    #     new_user_btn.triggered.connect(self._on_new_user)
-    #     toolbar.addAction(new_user_btn)
-        
-    #     toolbar.addSeparator()
-        
-    #     calculate_btn = QAction("营养计算", self)
-    #     calculate_btn.triggered.connect(self._on_calculate_nutrition)
-    #     toolbar.addAction(calculate_btn)
-        
     def _create_status_bar(self) -> None:
         """创建状态栏。"""
         statusbar = QStatusBar()
@@ -189,6 +169,9 @@ class MainWindow(QMainWindow):
         # 配置设置标签页
         settings_tab = SettingsTab(self.settings_controller)
         self.tab_widget.addTab(settings_tab, "配置设置")
+
+        # 连接主题改变信号
+        settings_tab.theme_changed.connect(self._apply_theme)
         
     # 事件处理函数
     def _on_new_user(self) -> None:
@@ -255,3 +238,133 @@ class MainWindow(QMainWindow):
             event.accept()
         else:
             event.ignore()
+    
+    def _apply_theme(self, theme):
+        """应用主题样式表。
+        
+        Args:
+            theme: 主题枚举值
+        """
+        from PyQt5.QtWidgets import QApplication
+        from fatloss.models.enums import Theme
+        
+        if theme == Theme.LIGHT:
+            # 浅色主题
+            style_sheet = """
+                QMainWindow {
+                    background-color: #f5f5f5;
+                }
+                QWidget {
+                    background-color: #f5f5f5;
+                    color: #333333;
+                }
+                QGroupBox {
+                    border: 1px solid #cccccc;
+                    border-radius: 4px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+                QPushButton {
+                    background-color: #007acc;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #005a9e;
+                }
+                QPushButton:pressed {
+                    background-color: #004578;
+                }
+                QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QTextEdit {
+                    border: 1px solid #cccccc;
+                    border-radius: 3px;
+                    padding: 5px;
+                    background-color: white;
+                }
+                QTabWidget::pane {
+                    border: 1px solid #cccccc;
+                    background-color: white;
+                }
+                QTabBar::tab {
+                    background-color: #e0e0e0;
+                    padding: 8px 16px;
+                    margin-right: 2px;
+                }
+                QTabBar::tab:selected {
+                    background-color: white;
+                }
+            """
+        elif theme == Theme.DARK:
+            # 深色主题
+            style_sheet = """
+                QMainWindow {
+                    background-color: #2b2b2b;
+                }
+                QWidget {
+                    background-color: #2b2b2b;
+                    color: #e0e0e0;
+                }
+                QGroupBox {
+                    border: 1px solid #555555;
+                    border-radius: 4px;
+                    margin-top: 10px;
+                    padding-top: 10px;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                    color: #e0e0e0;
+                }
+                QPushButton {
+                    background-color: #007acc;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #005a9e;
+                }
+                QPushButton:pressed {
+                    background-color: #004578;
+                }
+                QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox, QTextEdit {
+                    border: 1px solid #555555;
+                    border-radius: 3px;
+                    padding: 5px;
+                    background-color: #3c3c3c;
+                    color: #e0e0e0;
+                }
+                QTabWidget::pane {
+                    border: 1px solid #555555;
+                    background-color: #3c3c3c;
+                }
+                QTabBar::tab {
+                    background-color: #555555;
+                    color: #e0e0e0;
+                    padding: 8px 16px;
+                    margin-right: 2px;
+                }
+                QTabBar::tab:selected {
+                    background-color: #3c3c3c;
+                }
+            """
+        else:  # Theme.AUTO 或默认
+            # 使用系统默认样式，不清除样式表
+            style_sheet = ""
+        
+        # 应用样式表到整个应用程序
+        app = QApplication.instance()
+        if app:
+            app.setStyleSheet(style_sheet)
+        
+        # 更新当前窗口
+        self.setStyleSheet(style_sheet)

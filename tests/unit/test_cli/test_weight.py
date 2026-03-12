@@ -132,7 +132,7 @@ class TestWeightCommand:
         # 模拟unit_of_work上下文管理器
         mock_uow_context = Mock()
         mock_uow_context.users.get_by_id.return_value = Mock(id=1, name="测试用户")
-        mock_uow_context.weights.find_all_by_user_id.return_value = []
+        mock_uow_context.weights.find_by_user_id.return_value = []
         mock_uow.return_value.__enter__.return_value = mock_uow_context
 
         result = runner.invoke(cli, [
@@ -156,7 +156,7 @@ class TestWeightCommand:
         # 创建模拟体重记录
         mock_record1 = Mock(weight_kg=70.0, record_date=date(2026, 3, 10), notes="")
         mock_record2 = Mock(weight_kg=69.5, record_date=date(2026, 3, 11), notes="早晨空腹")
-        mock_uow_context.weights.find_all_by_user_id.return_value = [mock_record1, mock_record2]
+        mock_uow_context.weights.find_by_user_id.return_value = [mock_record1, mock_record2]
         mock_uow.return_value.__enter__.return_value = mock_uow_context
 
         result = runner.invoke(cli, [
@@ -337,7 +337,7 @@ class TestWeightCommand:
         mock_record1 = Mock(weight_kg=72.0, record_date=date(2026, 3, 10), notes="")
         mock_record2 = Mock(weight_kg=70.5, record_date=date(2026, 3, 11), notes="早晨空腹")
         mock_record3 = Mock(weight_kg=69.0, record_date=date(2026, 3, 12), notes="锻炼后")
-        mock_uow_context.weights.find_all_by_user_id.return_value = [mock_record1, mock_record2, mock_record3]
+        mock_uow_context.weights.find_by_user_id.return_value = [mock_record1, mock_record2, mock_record3]
         mock_uow.return_value.__enter__.return_value = mock_uow_context
 
         result = runner.invoke(cli, [
@@ -368,7 +368,7 @@ class TestWeightCommand:
         # 创建模拟体重记录，体重相同
         mock_record1 = Mock(weight_kg=70.0, record_date=date(2026, 3, 10), notes="")
         mock_record2 = Mock(weight_kg=70.0, record_date=date(2026, 3, 11), notes="")
-        mock_uow_context.weights.find_all_by_user_id.return_value = [mock_record1, mock_record2]
+        mock_uow_context.weights.find_by_user_id.return_value = [mock_record1, mock_record2]
         mock_uow.return_value.__enter__.return_value = mock_uow_context
 
         result = runner.invoke(cli, [

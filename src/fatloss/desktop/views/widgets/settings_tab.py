@@ -30,6 +30,7 @@ from PyQt5.QtWidgets import (
     QScrollArea,
     QSplitter,
     QSizePolicy,
+    QApplication,
 )
 
 from fatloss.models.app_config import AppConfig
@@ -89,7 +90,11 @@ class SettingsTab(QWidget):
         database_tab = self._create_database_tab()
         self.tab_widget.addTab(database_tab, "数据库管理")
         
-        # 标签页4：关于
+        # 标签页4：数据导出
+        export_tab = self._create_export_tab()
+        self.tab_widget.addTab(export_tab, "数据导出")
+        
+        # 标签页5：关于
         about_tab = self._create_about_tab()
         self.tab_widget.addTab(about_tab, "关于")
         
@@ -410,6 +415,229 @@ class SettingsTab(QWidget):
         tab.setLayout(layout)
         return tab
     
+    def _create_export_tab(self) -> QWidget:
+        """创建数据导出标签页。
+        
+        Returns:
+            数据导出标签页
+        """
+        tab = QWidget()
+        layout = QVBoxLayout()
+        layout.setSpacing(15)
+        
+        # 使用滚动区域
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        
+        scroll_content = QWidget()
+        scroll_layout = QVBoxLayout()
+        scroll_layout.setSpacing(20)
+        
+        # 导出设置
+        export_group = QGroupBox("导出设置")
+        export_layout = QFormLayout()
+        
+        # 导出格式选择
+        self.export_format_combo = QComboBox()
+        self.export_format_combo.addItem("JSON格式", "json")
+        self.export_format_combo.addItem("CSV格式", "csv")
+        export_layout.addRow("导出格式:", self.export_format_combo)
+        
+        # 包含体重记录
+        self.include_weight_check = QCheckBox("包含体重记录")
+        self.include_weight_check.setChecked(True)
+        export_layout.addRow(self.include_weight_check)
+        
+        # 包含营养计划
+        self.include_nutrition_check = QCheckBox("包含营养计划")
+        self.include_nutrition_check.setChecked(True)
+        export_layout.addRow(self.include_nutrition_check)
+        
+        export_group.setLayout(export_layout)
+        scroll_layout.addWidget(export_group)
+        
+        # 导出文件路径
+        path_group = QGroupBox("导出文件路径")
+        path_layout = QVBoxLayout()
+        
+        path_input_layout = QHBoxLayout()
+        self.export_path_edit = QLineEdit()
+        self.export_path_edit.setPlaceholderText("选择导出文件保存路径...")
+        path_input_layout.addWidget(self.export_path_edit, 1)
+        
+        browse_export_btn = QPushButton("浏览...")
+        browse_export_btn.clicked.connect(self._browse_export_path)
+        path_input_layout.addWidget(browse_export_btn)
+        
+        path_layout.addLayout(path_input_layout)
+        
+        # 默认文件名提示
+        default_path_label = QLabel(
+            "默认文件名格式: fatloss_export_{用户ID}_{日期}.{格式}\n"
+            "例如: fatloss_export_1_2026-03-12.json"
+        )
+        default_path_label.setStyleSheet("color: #666; font-size: 12px;")
+        path_layout.addWidget(default_path_label)
+        
+        path_group.setLayout(path_layout)
+        scroll_layout.addWidget(path_group)
+        
+        # 导出操作按钮
+        operation_group = QGroupBox("导出操作")
+        operation_layout = QVBoxLayout()
+        
+        # 导出按钮
+        export_btn = QPushButton("📤 导出数据")
+        export_btn.setToolTip("导出选中的数据")
+        export_btn.clicked.connect(self._export_user_data)
+        operation_layout.addWidget(export_btn)
+        
+        operation_group.setLayout(operation_layout)
+        scroll_layout.addWidget(operation_group)
+        
+        # 导出状态信息
+        self.export_status_label = QLabel("就绪")
+        self.export_status_label.setStyleSheet("color: #666; font-style: italic;")
+        scroll_layout.addWidget(self.export_status_label)
+        
+        # 导出统计信息显示区域
+        self.export_stats_text = QTextEdit()
+        self.export_stats_text.setReadOnly(True)
+        self.export_stats_text.setMaximumHeight(150)
+        self.export_stats_text.setPlaceholderText("导出统计信息将显示在这里...")
+        scroll_layout.addWidget(self.export_stats_text)
+        
+        scroll_layout.addStretch()
+        scroll_content.setLayout(scroll_layout)
+        scroll_area.setWidget(scroll_content)
+        
+        layout.addWidget(scroll_area)
+        tab.setLayout(layout)
+        return tab
+    
+    def _browse_export_path(self) -> None:
+        """浏览导出文件保存路径。"""
+        if not self.selected_user:
+            QMessageBox.warning(self, "警告", "请先选择用户")
+            return
+        
+        user_id = self.selected_user['id']
+        default_filename = f"fatloss_export_{user_id}_{date.today()}.json"
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "选择导出文件保存位置",
+            default_filename,
+            "JSON Files (*.json);;CSV Files (*.csv);;All Files (*)"
+        )
+        
+        if file_path:
+            self.export_path_edit.setText(file_path)
+            # 根据文件扩展名自动选择格式
+            if file_path.lower().endswith('.csv'):
+                self.export_format_combo.setCurrentIndex(1)  # CSV格式
+            else:
+                self.export_format_combo.setCurrentIndex(0)  # JSON格式
+    
+    def _export_user_data(self) -> None:
+        """导出用户数据。"""
+        if not self.selected_user:
+            QMessageBox.warning(self, "警告", "请先选择用户")
+            return
+        
+        export_path = self.export_path_edit.text().strip()
+        
+        if not export_path:
+            QMessageBox.warning(self, "警告", "请先选择导出文件路径")
+            return
+        
+        # 获取导出设置
+        export_format = self.export_format_combo.currentData()
+        include_weight_records = self.include_weight_check.isChecked()
+        include_nutrition_plans = self.include_nutrition_check.isChecked()
+        
+        user_id = self.selected_user['id']
+        
+        # 确认对话框
+        reply = QMessageBox.question(
+            self,
+            "导出数据",
+            f"确定要导出用户数据吗？\n\n"
+            f"用户: {self.selected_user['name']}\n"
+            f"格式: {export_format.upper()}\n"
+            f"包含体重记录: {'是' if include_weight_records else '否'}\n"
+            f"包含营养计划: {'是' if include_nutrition_plans else '否'}\n"
+            f"保存到: {export_path}",
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                # 显示导出中状态
+                self.export_status_label.setText("导出中...")
+                self.export_status_label.setStyleSheet("color: #0066cc; font-weight: bold;")
+                QApplication.processEvents()  # 更新UI
+                
+                # 调用控制器导出数据
+                stats = self.settings_controller.export_user_data(
+                    user_id=user_id,
+                    export_format=export_format,
+                    output_path=export_path,
+                    include_weight_records=include_weight_records,
+                    include_nutrition_plans=include_nutrition_plans,
+                    parent_widget=self
+                )
+                
+                # 显示导出成功
+                self.export_status_label.setText("导出成功 ✓")
+                self.export_status_label.setStyleSheet("color: #009933; font-weight: bold;")
+                
+                # 显示统计信息
+                stats_text = f"""✅ 数据导出成功！
+
+📁 导出文件: {stats['output_path']}
+📊 导出格式: {stats['export_format'].upper()}
+
+📈 导出内容统计:
+   • 用户信息: ✓
+   • 配置信息: ✓
+   • 体重记录: {stats['weight_records_count']} 条
+   • 每日营养计划: {stats['daily_nutrition_plans_count']} 条
+   • 每周营养计划: {stats['weekly_nutrition_plans_count']} 条
+
+💾 导出已完成，文件已保存到指定位置。"""
+                
+                self.export_stats_text.setText(stats_text)
+                
+                # 显示成功消息
+                QMessageBox.information(
+                    self,
+                    "导出成功",
+                    f"数据已成功导出到:\n{export_path}\n\n"
+                    f"共导出:\n"
+                    f"• 体重记录: {stats['weight_records_count']} 条\n"
+                    f"• 每日营养计划: {stats['daily_nutrition_plans_count']} 条\n"
+                    f"• 每周营养计划: {stats['weekly_nutrition_plans_count']} 条"
+                )
+                
+            except Exception as e:
+                # 显示导出失败
+                self.export_status_label.setText("导出失败 ✗")
+                self.export_status_label.setStyleSheet("color: #cc0000; font-weight: bold;")
+                
+                error_text = f"""❌ 导出失败！
+
+错误信息: {str(e)}
+
+请检查:
+1. 文件路径是否可写
+2. 用户数据是否完整
+3. 磁盘空间是否充足"""
+                
+                self.export_stats_text.setText(error_text)
+                ErrorHandler.handle_service_error(e, self)
+    
     def _create_about_tab(self) -> QWidget:
         """创建关于标签页。
         
@@ -426,17 +654,17 @@ class SettingsTab(QWidget):
         
         app_name = QLabel("Fatloss Planner")
         app_name.setStyleSheet("font-size: 24px; font-weight: bold;")
-        app_layout.addWidget(app_name, 0, Qt.AlignCenter)
+        app_layout.addWidget(app_name, 0, Qt.AlignmentFlag.AlignCenter)
         
         version_label = QLabel("版本: 1.0.0")
-        app_layout.addWidget(version_label, 0, Qt.AlignCenter)
+        app_layout.addWidget(version_label, 0, Qt.AlignmentFlag.AlignCenter)
         
         description = QLabel(
             "科学减脂计划工具\n"
             "基于BMR/TDEE计算和营养学原理，\n"
             "帮助您制定科学的减脂计划。"
         )
-        description.setAlignment(Qt.AlignCenter)
+        description.setAlignment(Qt.AlignmentFlag.AlignCenter)
         description.setWordWrap(True)
         app_layout.addWidget(description)
         
@@ -465,7 +693,7 @@ class SettingsTab(QWidget):
             "仅供学习和研究使用。\n"
             "商业使用请联系作者。"
         )
-        copyright_text.setAlignment(Qt.AlignCenter)
+        copyright_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         copyright_text.setWordWrap(True)
         copyright_layout.addWidget(copyright_text)
         

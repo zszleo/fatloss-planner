@@ -127,7 +127,7 @@ class SettingsController:
                         created_at=existing_config.created_at,
                     )
                     
-                    uow.app_configs.update(updated_config)
+                    uow.app_configs.update(existing_config.id, updated_config)
                     uow.commit()
                     
                     ErrorHandler.show_success("配置保存成功", parent_widget)
@@ -447,3 +447,133 @@ class SettingsController:
         # 验证数据保留天数
         if not (self.MIN_DATA_RETENTION_DAYS <= data_retention_days <= self.MAX_DATA_RETENTION_DAYS):
             raise ValueError(f"数据保留天数必须在{self.MIN_DATA_RETENTION_DAYS}到{self.MAX_DATA_RETENTION_DAYS}天之间")
+    
+    def export_user_data(
+        self,
+        user_id: int,
+        export_format: str,
+        output_path: str,
+        include_weight_records: bool = True,
+        include_nutrition_plans: bool = True,
+        parent_widget: Optional[QWidget] = None
+    ) -> Dict[str, Any]:
+        """导出用户数据为JSON或CSV格式。
+        
+        Args:
+            user_id: 用户ID
+            export_format: 导出格式，支持"json"或"csv"
+            output_path: 输出文件路径
+            include_weight_records: 是否包含体重记录
+            include_nutrition_plans: 是否包含营养计划
+            parent_widget: 父窗口部件，用于显示错误消息
+            
+        Returns:
+            导出统计信息字典，包含导出内容和数量
+            
+        Raises:
+            ValueError: 如果参数无效
+            Exception: 如果导出过程中出现错误
+        """
+        import json
+        import csv
+        from datetime import date
+        from pathlib import Path
+        
+        try:
+            with unit_of_work(self.planner_service.database_url) as uow:
+                # 获取用户信息
+                user = uow.users.get_by_id(user_id)
+                if user is None:
+                    raise ValueError(f"用户不存在：{user_id}")
+                
+                # 获取用户配置
+                config = uow.app_configs.get_by_user_id(user_id)
+                if config is None:
+                    config_data = {}
+                else:
+                    config_data = config.model_dump()
+                
+                # 构建导出数据结构
+                export_data = {
+                    "user": user.model_dump(),
+                    "config": config_data,
+                    "export_date": date.today().isoformat(),
+                    "export_format": export_format,
+                }
+                
+                # 包含体重记录
+                if include_weight_records:
+                    weight_records = uow.weights.find_by_user_id(user_id)
+                    export_data["weight_records"] = [
+                        record.model_dump() for record in weight_records
+                    ]
+                
+                # 包含营养计划
+                if include_nutrition_plans:
+                    daily_plans = uow.daily_nutrition.find_by_user_id(user_id)
+                    weekly_plans = uow.weekly_nutrition.find_by_user_id(user_id)
+                    
+                    export_data["daily_nutrition_plans"] = [
+                        plan.model_dump() for plan in daily_plans
+                    ]
+                    export_data["weekly_nutrition_plans"] = [
+                        plan.model_dump() for plan in weekly_plans
+                    ]
+                
+                # 导出到文件
+                output_path_obj = Path(output_path)
+                output_path_obj.parent.mkdir(parents=True, exist_ok=True)
+                
+                if export_format.lower() == "json":
+                    with open(output_path_obj, "w", encoding="utf-8") as f:
+                        json.dump(
+                            export_data,
+                            f,
+                            ensure_ascii=False,
+                            indent=2,
+                            default=str,
+                        )
+                elif export_format.lower() == "csv":
+                    # CSV导出简化：只导出体重记录（如果包含）
+                    if include_weight_records and "weight_records" in export_data:
+                        weight_records = export_data["weight_records"]
+                        if weight_records:
+                            with open(output_path_obj, "w", newline="", encoding="utf-8") as f:
+                                writer = csv.DictWriter(f, fieldnames=weight_records[0].keys())
+                                writer.writeheader()
+                                writer.writerows(weight_records)
+                        else:
+                            # 如果没有体重记录，创建空文件
+                            with open(output_path_obj, "w", encoding="utf-8") as f:
+                                f.write("No weight records to export\n")
+                    else:
+                        # 如果没有选择体重记录，导出基本用户信息
+                        with open(output_path_obj, "w", newline="", encoding="utf-8") as f:
+                            writer = csv.writer(f)
+                            writer.writerow(["Field", "Value"])
+                            writer.writerow(["User ID", user.id])
+                            writer.writerow(["User Name", user.name])
+                            writer.writerow(["Gender", user.gender])
+                            writer.writerow(["Birth Date", user.birth_date])
+                            writer.writerow(["Height (cm)", user.height_cm])
+                            writer.writerow(["Initial Weight (kg)", user.initial_weight_kg])
+                            writer.writerow(["Activity Level", user.activity_level])
+                else:
+                    raise ValueError(f"不支持的导出格式: {export_format}，支持 'json' 或 'csv'")
+                
+                # 构建统计信息
+                stats = {
+                    "output_path": str(output_path_obj),
+                    "export_format": export_format,
+                    "user_info": True,
+                    "config_info": True,
+                    "weight_records_count": len(export_data.get("weight_records", [])),
+                    "daily_nutrition_plans_count": len(export_data.get("daily_nutrition_plans", [])),
+                    "weekly_nutrition_plans_count": len(export_data.get("weekly_nutrition_plans", [])),
+                }
+                
+                return stats
+                
+        except Exception as e:
+            ErrorHandler.handle_service_error(e, parent_widget)
+            raise

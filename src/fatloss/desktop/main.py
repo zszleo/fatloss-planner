@@ -32,8 +32,7 @@ try:
             'KaiTi',                # 楷体
             'Microsoft JhengHei',   # 微软正黑体
         ]
-        print(f"Windows系统: 配置Windows中文字体")
-        
+                
         # Windows特定字体路径
         windows_font_paths = [
             'C:/Windows/Fonts/msyh.ttc',      # 微软雅黑
@@ -89,27 +88,6 @@ try:
     
     # 强制指定字体族，确保使用sans-serif
     rcParams['font.family'] = 'sans-serif'
-    
-    # 测试字体配置
-    print(f"Matplotlib中文字体配置:")
-    print(f"  系统平台: {system}")
-    print(f"  主字体: {clean_fonts[0] if clean_fonts else '无'}")
-    print(f"  字体列表前5个: {', '.join(clean_fonts[:5])}")
-    
-    # 立即测试字体是否可用
-    try:
-        # 创建一个简单的测试来验证中文字体
-        test_fig, test_ax = plt.subplots(figsize=(1, 1))
-        test_ax.text(0.5, 0.5, '测试中文', fontsize=12, ha='center', va='center')
-        plt.close(test_fig)
-        print(f"  中文测试: 成功")
-    except Exception as e:
-        print(f"  中文测试警告: {e}")
-        print(f"  尝试使用备用字体配置...")
-        
-        # 如果失败，尝试更简单的配置
-        rcParams['font.sans-serif'] = ['DejaVu Sans', 'Arial', 'Helvetica']
-        print(f"  已切换至备用字体配置")
     
 except ImportError:
     # matplotlib不可用，图表功能将受限

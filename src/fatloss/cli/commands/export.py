@@ -86,15 +86,15 @@ def export(user_id, format, output, include_weight_records, include_nutrition_pl
             
             # 包含体重记录
             if include_weight_records:
-                weight_records = uow.weights.find_all_by_user_id(user_id)
+                weight_records = uow.weights.find_by_user_id(user_id)
                 export_data["weight_records"] = [
                     record.model_dump() for record in weight_records
                 ]
             
             # 包含营养计划
             if include_nutrition_plans:
-                daily_plans = uow.daily_nutrition.find_all_by_user_id(user_id)
-                weekly_plans = uow.weekly_nutrition.find_all_by_user_id(user_id)
+                daily_plans = uow.daily_nutrition.find_by_user_id(user_id)
+                weekly_plans = uow.weekly_nutrition.find_by_user_id(user_id)
                 
                 export_data["daily_nutrition_plans"] = [
                     plan.model_dump() for plan in daily_plans

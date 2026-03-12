@@ -102,7 +102,7 @@ def history(user_id, limit, reverse):
                 raise click.ClickException(f"用户不存在：{user_id}")
             
             # 获取体重记录
-            weight_records = uow.weights.find_all_by_user_id(user_id)
+            weight_records = uow.weights.find_by_user_id(user_id)
             if not weight_records:
                 click.echo(f"📭 用户 {user.name} 没有体重记录")
                 return
@@ -119,7 +119,7 @@ def history(user_id, limit, reverse):
                 weight_records = weight_records[:limit]
             
             click.echo(f"📈 体重历史记录 - {user.name}")
-            click.echo(f"📊 总记录数: {len(uow.weights.find_all_by_user_id(user_id))}")
+            click.echo(f"📊 总记录数: {len(uow.weights.find_by_user_id(user_id))}")
             click.echo("=" * 50)
             
             # 计算变化
