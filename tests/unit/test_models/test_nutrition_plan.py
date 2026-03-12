@@ -81,7 +81,7 @@ class TestDailyNutritionPlan:
         assert plan.plan_date == date.today()
         
         # 未来日期
-        future_date = date.today()
+        future_date = date.today() + timedelta(days=1)
         plan = DailyNutritionPlan(
             user_id=1,
             plan_date=future_date,
@@ -90,14 +90,15 @@ class TestDailyNutritionPlan:
         )
         assert plan.plan_date == future_date
         
-        # 过去日期应引发错误
-        with pytest.raises(ValueError, match="计划日期不能是过去日期"):
-            DailyNutritionPlan(
-                user_id=1,
-                plan_date=date(2020, 1, 1),
-                target_tdee=2000.0,
-                nutrition=nutrition,
-            )
+        # 过去日期现在应该被允许（用于历史记录）
+        past_date = date(2020, 1, 1)
+        plan = DailyNutritionPlan(
+            user_id=1,
+            plan_date=past_date,
+            target_tdee=2000.0,
+            nutrition=nutrition,
+        )
+        assert plan.plan_date == past_date
 
     def test_user_id_validation(self):
         """测试用户ID验证"""

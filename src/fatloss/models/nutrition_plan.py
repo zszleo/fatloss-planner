@@ -30,9 +30,9 @@ class DailyNutritionPlan(BaseModel):
 
     @field_validator("plan_date", mode="before")
     def validate_plan_date(cls, v):
-        """验证计划日期"""
-        if v < date.today():
-            raise ValueError("计划日期不能是过去日期")
+        """验证计划日期（允许过去日期以便历史记录和查看）"""
+        # 允许过去、现在和未来日期
+        # 过去日期可用于历史记录和查看
         return v
 
 
