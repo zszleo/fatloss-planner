@@ -52,9 +52,6 @@ class MainWindow(QMainWindow):
         # 初始化UI
         self._init_ui()
         
-        # 状态栏初始信息
-        self.statusBar().showMessage("就绪")
-        
     def _init_ui(self) -> None:
         """初始化用户界面。"""
         # 创建菜单栏

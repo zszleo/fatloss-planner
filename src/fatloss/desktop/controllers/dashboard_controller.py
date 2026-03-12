@@ -503,7 +503,7 @@ class DashboardController:
             metrics["protein_g"] = nutrition.protein_g
             metrics["carbs_g"] = nutrition.carbohydrates_g
             metrics["fat_g"] = nutrition.fat_g
-            metrics["calories"] = nutrition.calories_kcal
+            metrics["calories"] = nutrition.total_calories
         
         # 进度指标
         if progress_info:

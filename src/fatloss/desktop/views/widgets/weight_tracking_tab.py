@@ -36,6 +36,20 @@ try:
     matplotlib.use('Qt5Agg')
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.figure import Figure
+    from matplotlib import rcParams
+    import platform
+    
+    # 确保中文字体配置
+    system = platform.system().lower()
+    if system == 'windows':
+        rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'SimSun', 'DejaVu Sans', 'Arial']
+    elif system == 'darwin':
+        rcParams['font.sans-serif'] = ['PingFang SC', 'Hiragino Sans GB', 'STHeiti', 'DejaVu Sans', 'Arial']
+    else:
+        rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans', 'Arial']
+    
+    rcParams['axes.unicode_minus'] = False
+    
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False

@@ -96,7 +96,7 @@ class NutritionTableModel(QAbstractTableModel):
             elif attr_name == "fat":
                 return f"{plan.nutrition.fat_g:.1f}"
             elif attr_name == "calories":
-                return f"{plan.nutrition.calories_kcal:.0f}"
+                return f"{plan.nutrition.total_calories:.0f}"
             elif attr_name == "adjusted":
                 return "是" if plan.is_adjusted else "否"
             elif attr_name == "adjustment":

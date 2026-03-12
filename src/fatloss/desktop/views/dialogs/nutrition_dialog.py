@@ -348,7 +348,7 @@ class NutritionDialog(QDialog):
             self.protein_label.setText(f"{nutrition.protein_g:.1f} g")
             self.carbs_label.setText(f"{nutrition.carbohydrates_g:.1f} g")
             self.fat_label.setText(f"{nutrition.fat_g:.1f} g")
-            self.calories_label.setText(f"{nutrition.calories_kcal:.0f} kcal")
+            self.calories_label.setText(f"{nutrition.total_calories:.0f} kcal")
             
             # 计算完整的营养计划
             plan = self.nutrition_controller.calculate_nutrition_plan(

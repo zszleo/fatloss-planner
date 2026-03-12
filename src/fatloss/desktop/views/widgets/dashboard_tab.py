@@ -31,6 +31,20 @@ try:
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
+    from matplotlib import rcParams
+    import platform
+    
+    # 确保中文字体配置
+    system = platform.system().lower()
+    if system == 'windows':
+        rcParams['font.sans-serif'] = ['Microsoft YaHei', 'SimHei', 'SimSun', 'DejaVu Sans', 'Arial']
+    elif system == 'darwin':
+        rcParams['font.sans-serif'] = ['PingFang SC', 'Hiragino Sans GB', 'STHeiti', 'DejaVu Sans', 'Arial']
+    else:
+        rcParams['font.sans-serif'] = ['Noto Sans CJK SC', 'WenQuanYi Micro Hei', 'DejaVu Sans', 'Arial']
+    
+    rcParams['axes.unicode_minus'] = False
+    
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
     MATPLOTLIB_AVAILABLE = False
@@ -592,7 +606,7 @@ class DashboardTab(QWidget):
                 ax.plot(dates, trend, 'r--', linewidth=1.5, label='趋势线')
             
             # 添加标题和标签
-            ax.set_title(f'体重趋势图（最近{chart_days}天）', fontsize=14, fontweight='bold')
+            ax.set_title(f'体重趋势图 (最近 {chart_days} 天)', fontsize=14, fontweight='bold')
             ax.set_xlabel('日期', fontsize=12)
             ax.set_ylabel('体重 (kg)', fontsize=12)
             
