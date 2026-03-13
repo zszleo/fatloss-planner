@@ -156,6 +156,8 @@ class NutritionController:
             
             # 获取用户最新体重
             with unit_of_work(self.planner_service.database_url) as uow:
+                if user.id is None:
+                    raise ValueError(f"用户ID无效: {user}")
                 latest_weight = uow.weights.find_latest_by_user_id(user.id)
                 if latest_weight is None:
                     raise ValueError(f"用户没有体重记录: {user.id}")
@@ -176,7 +178,7 @@ class NutritionController:
                     "tdee": tdee,
                     "weight_kg": latest_weight.weight_kg
                 }
-                
+                    
         except Exception as e:
             ErrorHandler.handle_service_error(e)
             return {"bmr": 0.0, "tdee": 0.0, "weight_kg": 0.0}
@@ -209,6 +211,12 @@ class NutritionController:
                     adjustment_units=adjustment_units
                 )
                 nutrition.carbohydrates_g = adjusted_carb
+                # 重新计算总热量
+                from fatloss.calculator.nutrition_calculator import NutritionConstants
+                protein_calories = nutrition.protein_g * NutritionConstants.CALORIES_PER_GRAM_PROTEIN
+                fat_calories = nutrition.fat_g * NutritionConstants.CALORIES_PER_GRAM_FAT
+                carb_calories = nutrition.carbohydrates_g * NutritionConstants.CALORIES_PER_GRAM_CARB
+                nutrition.total_calories = round(carb_calories + protein_calories + fat_calories, 2)
             
             return nutrition
             
