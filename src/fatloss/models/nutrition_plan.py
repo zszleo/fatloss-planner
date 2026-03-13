@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, ConfigDict, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 from fatloss.calculator.nutrition_calculator import NutritionDistribution
 
@@ -18,10 +18,10 @@ class DailyNutritionPlan(BaseModel):
     nutrition: NutritionDistribution = Field(..., description="营养素分配")
     is_adjusted: bool = Field(default=False, description="是否已调整")
     adjustment_units: int = Field(default=0, description="碳水化合物调整单位数")
-    notes: str = Field(default="", max_length=500, description="备注")
+    notes: str | None = Field(default="", max_length=500, description="备注")
     created_at: date = Field(default_factory=date.today, description="创建日期")
 
-    @field_serializer('plan_date', 'created_at')
+    @field_serializer("plan_date", "created_at")
     def serialize_date(self, value: date, _info):
         """序列化日期字段为ISO格式"""
         return value.isoformat() if value else None
@@ -54,7 +54,7 @@ class WeeklyNutritionPlan(BaseModel):
     notes: str = Field(default="", max_length=1000, description="备注")
     created_at: date = Field(default_factory=date.today, description="创建日期")
 
-    @field_serializer('week_start_date', 'week_end_date', 'created_at')
+    @field_serializer("week_start_date", "week_end_date", "created_at")
     def serialize_date(self, value: date, _info):
         """序列化日期字段为ISO格式"""
         return value.isoformat() if value else None
