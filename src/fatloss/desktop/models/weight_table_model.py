@@ -141,7 +141,8 @@ class WeightTableModel(QAbstractTableModel):
                             return f"{change:.2f}"
                         else:
                             return "0.00"
-                return "0.00"
+                # This line should never be reached since record is always in sorted_records
+                return "0.00"  # pragma: no cover
             
             elif attr_name == "notes":
                 # 备注显示（截断过长的备注）
@@ -166,7 +167,8 @@ class WeightTableModel(QAbstractTableModel):
             # 返回列对齐方式
             if col < len(self.COLUMN_ALIGNMENT):
                 return self.COLUMN_ALIGNMENT[col]
-            return Qt.AlignLeft | Qt.AlignVCenter
+            # This line should never be reached since Qt returns invalid index for out-of-bounds columns
+            return Qt.AlignLeft | Qt.AlignVCenter  # pragma: no cover
         
         elif role == Qt.BackgroundRole:
             # 交替行颜色

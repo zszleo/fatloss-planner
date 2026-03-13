@@ -41,13 +41,13 @@ def qapp():
 
 
 @pytest.fixture
-def qtbot(qapp):
+def qtbot(request):
     """创建QtBot用于界面测试。
 
     QtBot提供模拟用户交互的方法（点击、键盘输入等）。
     """
     from pytestqt.qtbot import QtBot
-    return QtBot(qapp)
+    return QtBot(request)
 
 
 @pytest.fixture(scope="session")

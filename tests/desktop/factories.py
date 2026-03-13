@@ -90,7 +90,7 @@ class TestDataFactory:
                     user_id=user_id,
                     weight_kg=round(weight, 1),
                     record_date=record_date,
-                    notes=f"第{i+1}天记录" if i % 7 == 0 else None,
+                    notes=f"第{i+1}天记录" if i % 7 == 0 else "",
                 )
             )
 

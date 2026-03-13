@@ -144,7 +144,8 @@ class NutritionTableModel(QAbstractTableModel):
         """
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
-                return self.COLUMN_NAMES[section]
+                if section < len(self.COLUMN_NAMES):
+                    return self.COLUMN_NAMES[section]
             elif orientation == Qt.Vertical:
                 return str(section + 1)
         
