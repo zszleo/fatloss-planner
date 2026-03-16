@@ -348,6 +348,24 @@ class TestWeightController:
         # Assert
         assert result is False
         mock_error_handler.show_warning.assert_called_once()
+
+    # 缺失测试：delete_weight 异常处理
+    @patch("fatloss.desktop.controllers.weight_controller.ErrorHandler")
+    def test_delete_weight_error(self, mock_error_handler, controller, sample_weight_record):
+        """测试删除体重记录 - 异常"""
+        # Arrange
+        weight_id = 1
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_all.return_value = [sample_weight_record]
+        mock_uow.weights.delete.side_effect = Exception("Database error")
+        
+        # Act
+        result = controller.delete_weight(weight_id)
+        
+        # Assert
+        assert result is False
+        mock_error_handler.handle_service_error.assert_called_once()
     
     # 测试get_weight_stats方法
     
@@ -392,6 +410,68 @@ class TestWeightController:
         assert result["avg_weight"] is None
         assert result["total_change"] == 0.0
         assert result["avg_daily_change"] == 0.0
+
+    # 缺失测试：get_weight_stats avg_daily_change 计算 (days_diff <= 0)
+    def test_get_weight_stats_same_date_records(self, controller, mock_planner_service, sample_user):
+        """测试获取体重统计 - 同日期记录"""
+        # Arrange
+        user_id = 1
+        today = date.today()
+        
+        # Create records with same date
+        same_date_records = [
+            WeightRecord(id=1, user_id=user_id, weight_kg=70.0, record_date=today, notes="Morning"),
+            WeightRecord(id=2, user_id=user_id, weight_kg=69.5, record_date=today, notes="Evening"),
+        ]
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.return_value = same_date_records
+        
+        # Act
+        result = controller.get_weight_stats(user_id)
+        
+        # Assert
+        assert result["count"] == 2
+        assert result["avg_daily_change"] == 0.0  # days_diff = 0, so avg_daily_change = 0.0
+
+    # 缺失测试：get_weight_stats 只有一条记录
+    def test_get_weight_stats_single_record(self, controller, mock_planner_service, sample_user):
+        """测试获取体重统计 - 只有一条记录"""
+        # Arrange
+        user_id = 1
+        today = date.today()
+        
+        # Create single record
+        single_record = [
+            WeightRecord(id=1, user_id=user_id, weight_kg=70.0, record_date=today, notes="Test")
+        ]
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.return_value = single_record
+        
+        # Act
+        result = controller.get_weight_stats(user_id)
+        
+        # Assert
+        assert result["count"] == 1
+        assert result["avg_daily_change"] == 0.0  # Only one record, so no daily change
+
+    # 缺失测试：get_weight_stats 异常处理
+    @patch("fatloss.desktop.controllers.weight_controller.ErrorHandler")
+    def test_get_weight_stats_error(self, mock_error_handler, controller):
+        """测试获取体重统计 - 异常"""
+        # Arrange
+        user_id = 1
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.side_effect = Exception("Database error")
+        
+        # Act
+        result = controller.get_weight_stats(user_id)
+        
+        # Assert
+        assert result["count"] == 0
+        mock_error_handler.handle_service_error.assert_called_once()
     
     # 测试get_latest_weight方法
     
@@ -423,6 +503,23 @@ class TestWeightController:
         
         # Assert
         assert result is None
+
+    # 缺失测试：get_latest_weight 异常处理
+    @patch("fatloss.desktop.controllers.weight_controller.ErrorHandler")
+    def test_get_latest_weight_error(self, mock_error_handler, controller):
+        """测试获取最新体重记录 - 异常"""
+        # Arrange
+        user_id = 1
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_latest_by_user_id.side_effect = Exception("Database error")
+        
+        # Act
+        result = controller.get_latest_weight(user_id)
+        
+        # Assert
+        assert result is None
+        mock_error_handler.handle_service_error.assert_called_once()
     
     # 测试get_chart_data方法
     
@@ -461,6 +558,25 @@ class TestWeightController:
         assert result["dates"] == []
         assert result["weights"] == []
         assert result["records"] == []
+
+    # 缺失测试：get_chart_data 异常处理
+    @patch("fatloss.desktop.controllers.weight_controller.ErrorHandler")
+    def test_get_chart_data_error(self, mock_error_handler, controller):
+        """测试获取图表数据 - 异常"""
+        # Arrange
+        user_id = 1
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.side_effect = Exception("Database error")
+        
+        # Act
+        result = controller.get_chart_data(user_id)
+        
+        # Assert
+        assert result["dates"] == []
+        assert result["weights"] == []
+        assert result["records"] == []
+        mock_error_handler.handle_service_error.assert_called_once()
     
     # 测试calculate_weight_loss_progress方法
     
@@ -529,6 +645,23 @@ class TestWeightController:
         
         # Assert
         assert result is None
+
+    # 缺失测试：get_user_by_id 异常处理
+    @patch("fatloss.desktop.controllers.weight_controller.ErrorHandler")
+    def test_get_user_by_id_error(self, mock_error_handler, controller):
+        """测试根据ID获取用户 - 异常"""
+        # Arrange
+        user_id = 1
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.side_effect = Exception("Database error")
+        
+        # Act
+        result = controller.get_user_by_id(user_id)
+        
+        # Assert
+        assert result is None
+        mock_error_handler.handle_service_error.assert_called_once()
     
     # 测试get_all_users方法
     
@@ -557,3 +690,13 @@ class TestWeightController:
         
         # Assert
         assert result == []
+
+    # 缺失测试：_validate_weight_input 验证失败 (备注过长)
+    def test_validate_weight_input_notes_too_long(self, controller):
+        """测试验证体重输入 - 备注过长"""
+        # Arrange & Act & Assert
+        with pytest.raises(ValueError, match="备注长度不能超过"):
+            controller._validate_weight_input(
+                weight_kg=70.0,
+                notes="a" * 501  # 超过 500 字符
+            )

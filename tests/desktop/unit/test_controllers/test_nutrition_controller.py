@@ -551,6 +551,20 @@ class TestNutritionController:
         # Assert
         assert result is None
     
+    def test_get_user_by_id_error(self, controller):
+        """测试根据ID获取用户 - 数据库错误"""
+        # Arrange
+        user_id = 1
+        # Configure the unit_of_work mock to raise exception
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.side_effect = Exception("数据库错误")
+    
+        # Act
+        result = controller.get_user_by_id(user_id)
+    
+        # Assert
+        assert result is None
+    
     def test_get_all_users_success(self, controller):
         """测试获取所有用户"""
         # Arrange
@@ -587,3 +601,68 @@ class TestNutritionController:
     
         # Assert
         assert result == []
+    
+    # 测试calculate_bmr_tdee方法中的边界情况
+    
+    def test_calculate_bmr_tdee_user_id_none(self, controller):
+        """测试计算BMR和TDEE - 用户ID为None"""
+        # Arrange
+        # 创建用户对象，id为None
+        from fatloss.models.user_profile import UserProfile
+        from datetime import date
+        from fatloss.models.enums import Gender, ActivityLevel
+        
+        user_without_id = UserProfile(
+            id=None,  # id为None
+            name="测试用户",
+            gender=Gender.MALE,
+            birth_date=date(1990, 1, 1),
+            height_cm=175.0,
+            initial_weight_kg=70.0,
+            activity_level=ActivityLevel.MODERATE
+        )
+        
+        exercise_minutes = 60.0
+        
+        # Act
+        result = controller.calculate_bmr_tdee(user_without_id, exercise_minutes)
+        
+        # Assert
+        # 用户ID无效，应该返回默认值
+        assert result["bmr"] == 0.0
+        assert result["tdee"] == 0.0
+        assert result["weight_kg"] == 0.0
+        # ErrorHandler应该被调用
+        self.mock_error_handler.handle_service_error.assert_called_once()
+    
+    # 测试format_nutrition_summary方法中的调整情况
+    
+    def test_format_nutrition_summary_with_positive_adjustment(self, controller, sample_nutrition_plan):
+        """测试格式化营养计划摘要 - 正调整（增加碳水化合物）"""
+        # Arrange
+        # 修改sample_nutrition_plan，使其有正调整
+        sample_nutrition_plan.is_adjusted = True
+        sample_nutrition_plan.adjustment_units = 2  # 增加60g碳水
+        
+        # Act
+        result = controller.format_nutrition_summary(sample_nutrition_plan)
+        
+        # Assert
+        assert isinstance(result, str)
+        assert "调整: 增加 60g 碳水化合物" in result
+        assert "📊" in result
+    
+    def test_format_nutrition_summary_with_negative_adjustment(self, controller, sample_nutrition_plan):
+        """测试格式化营养计划摘要 - 负调整（减少碳水化合物）"""
+        # Arrange
+        # 修改sample_nutrition_plan，使其有负调整
+        sample_nutrition_plan.is_adjusted = True
+        sample_nutrition_plan.adjustment_units = -1  # 减少30g碳水
+        
+        # Act
+        result = controller.format_nutrition_summary(sample_nutrition_plan)
+        
+        # Assert
+        assert isinstance(result, str)
+        assert "调整: 减少 30g 碳水化合物" in result
+        assert "📊" in result

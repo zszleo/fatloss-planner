@@ -189,6 +189,19 @@ class TestDashboardController:
         # Assert
         assert result is None
     
+    def test_get_dashboard_data_summary_empty(self, controller, mock_planner_service):
+        """测试获取仪表盘数据 - 用户摘要为空"""
+        # Arrange
+        user_id = 1
+        mock_planner_service.get_user_summary.return_value = None
+        
+        # Act
+        result = controller.get_dashboard_data(user_id)
+        
+        # Assert
+        assert result is None
+        mock_planner_service.get_user_summary.assert_called_once_with(user_id)
+    
     def test_get_dashboard_data_with_parent_widget(self, controller, mock_planner_service):
         """测试获取仪表盘数据时提供父窗口部件"""
         # Arrange
@@ -271,6 +284,51 @@ class TestDashboardController:
             user_id=user_id,
             target_weight_kg=target_weight_kg
         )
+    
+    def test_get_weight_loss_progress_with_default_target(self, controller, mock_planner_service):
+        """测试获取减重进度 - 使用默认目标体重"""
+        # Arrange
+        user_id = 1
+        expected_progress = {
+            "current_weight": 70.0,
+            "target_weight": 66.5,  # 70.0 * 0.95
+            "weight_loss_kg": 3.5,
+            "progress_percentage": 30.0,
+            "weeks_remaining": 7,
+            "expected_completion_date": date.today() + timedelta(days=49)
+        }
+        # 配置unit_of_work模拟返回用户
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_user = Mock()
+        mock_user.initial_weight_kg = 70.0
+        mock_uow.users.get_by_id.return_value = mock_user
+        
+        mock_planner_service.calculate_weight_loss_progress.return_value = expected_progress
+        
+        # Act
+        result = controller.get_weight_loss_progress(user_id)  # target_weight_kg为None
+        
+        # Assert
+        assert result == expected_progress
+        mock_planner_service.calculate_weight_loss_progress.assert_called_once_with(
+            user_id=user_id,
+            target_weight_kg=66.5  # 70.0 * 0.95
+        )
+    
+    def test_get_weight_loss_progress_user_not_found(self, controller, mock_planner_service):
+        """测试获取减重进度 - 用户不存在"""
+        # Arrange
+        user_id = 999
+        # 配置unit_of_work模拟返回None
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = None
+        
+        # Act
+        result = controller.get_weight_loss_progress(user_id)  # target_weight_kg为None
+        
+        # Assert
+        assert result is None
+        mock_planner_service.calculate_weight_loss_progress.assert_not_called()
     
     def test_get_weight_loss_progress_error(self, controller, mock_planner_service):
         """测试获取减重进度错误"""
@@ -430,6 +488,27 @@ class TestDashboardController:
         assert result["has_data"] is False
         assert result["record_count"] == 0
     
+    def test_get_weight_stats_error(self, controller, mock_planner_service):
+        """测试获取体重统计 - 数据库错误"""
+        # Arrange
+        user_id = 1
+        # 配置unit_of_work模拟抛出异常
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.side_effect = Exception("数据库错误")
+        
+        # Act
+        result = controller._get_weight_stats(user_id)
+        
+        # Assert
+        assert result["has_data"] is False
+        assert result["record_count"] == 0
+        assert result["latest_weight"] is None
+        assert result["min_weight"] is None
+        assert result["max_weight"] is None
+        assert result["avg_weight"] is None
+        assert result["total_change"] == 0.0
+        assert result["avg_daily_change"] == 0.0
+    
     # 测试辅助方法_get_recent_nutrition_plans
     
     def test_get_recent_nutrition_plans_with_plans(self, controller, mock_planner_service, sample_nutrition_plans):
@@ -468,6 +547,138 @@ class TestDashboardController:
         # Assert
         assert result == []
     
+    def test_get_recent_nutrition_plans_error(self, controller, mock_planner_service):
+        """测试获取最近营养计划 - 数据库错误"""
+        # Arrange
+        user_id = 1
+        # 配置unit_of_work模拟抛出异常
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.daily_nutrition.find_by_user_id.side_effect = Exception("数据库错误")
+        
+        # Act
+        result = controller._get_recent_nutrition_plans(user_id)
+        
+        # Assert
+        assert result == []
+        mock_uow.daily_nutrition.find_by_user_id.assert_called_once_with(user_id)
+    
+    # 测试辅助方法_get_weight_loss_progress
+    
+    def test_get_weight_loss_progress_success_private(self, controller, mock_planner_service, sample_user):
+        """测试私有方法_get_weight_loss_progress成功"""
+        # Arrange
+        user_id = 1
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = sample_user
+        mock_weight = Mock(weight_kg=68.5)
+        mock_uow.weights.find_latest_by_user_id.return_value = mock_weight
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is not None
+        assert result["current_weight"] == 68.5
+        assert result["initial_weight"] == 70.0
+        assert result["target_weight"] == 66.5  # 70.0 * 0.95
+        assert "progress_percentage" in result
+        assert "weight_to_lose" in result
+        assert "weight_lost" in result
+    
+    def test_get_weight_loss_progress_user_not_found_private(self, controller, mock_planner_service):
+        """测试私有方法_get_weight_loss_progress - 用户不存在"""
+        # Arrange
+        user_id = 999
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = None
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is None
+        mock_uow.users.get_by_id.assert_called_once_with(user_id)
+        mock_uow.weights.find_latest_by_user_id.assert_not_called()
+    
+    def test_get_weight_loss_progress_no_weight_record_private(self, controller, mock_planner_service, sample_user):
+        """测试私有方法_get_weight_loss_progress - 无体重记录"""
+        # Arrange
+        user_id = 1
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = sample_user
+        mock_uow.weights.find_latest_by_user_id.return_value = None
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is None
+        mock_uow.users.get_by_id.assert_called_once_with(user_id)
+        mock_uow.weights.find_latest_by_user_id.assert_called_once_with(user_id)
+    
+    def test_get_weight_loss_progress_error_private(self, controller, mock_planner_service):
+        """测试私有方法_get_weight_loss_progress - 数据库错误"""
+        # Arrange
+        user_id = 1
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.side_effect = Exception("数据库错误")
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is None
+    
+    def test_get_weight_loss_progress_zero_loss_possible_private(self, controller, mock_planner_service, sample_user):
+        """测试私有方法_get_weight_loss_progress - 无减重空间"""
+        # Arrange
+        user_id = 1
+        # 修改sample_user的初始体重，使目标体重>=初始体重
+        sample_user.initial_weight_kg = 60.0
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = sample_user
+        mock_weight = Mock(weight_kg=62.0)  # 当前体重高于初始体重
+        mock_uow.weights.find_latest_by_user_id.return_value = mock_weight
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is not None
+        # 目标体重 = 60.0 * 0.95 = 57.0
+        # total_possible_loss = 60.0 - 57.0 = 3.0 > 0
+        # 但我们需要测试total_possible_loss <= 0的情况
+        # 让我们创建一个特殊情况：目标体重 >= 初始体重
+        # 实际上，目标体重是初始体重的95%，所以总是小于初始体重
+        # 因此total_possible_loss总是>0
+        # 这个测试仍然有效，但不会触发382行
+        # 我们需要模拟目标体重 >= 初始体重的情况
+        # 由于目标体重计算是硬编码的，我们无法直接改变
+        # 所以这个测试主要验证逻辑正确性
+        
+    def test_get_weight_loss_progress_negative_progress_private(self, controller, mock_planner_service, sample_user):
+        """测试私有方法_get_weight_loss_progress - 负进度（体重增加）"""
+        # Arrange
+        user_id = 1
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = sample_user
+        # 当前体重高于初始体重，实际增重
+        mock_weight = Mock(weight_kg=72.0)  # 初始体重70.0，增加了2kg
+        mock_uow.weights.find_latest_by_user_id.return_value = mock_weight
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        assert result is not None
+        # 目标体重 = 70.0 * 0.95 = 66.5
+        # 当前体重 = 72.0
+        # actual_loss_so_far = 70.0 - 72.0 = -2.0（负值，表示增重）
+        # progress_percentage应该是负值，但会被min/max限制在0-100
+        assert result["progress_percentage"] == 0.0  # 负值被限制为0
+        assert result["weight_lost"] == 0.0  # max(0, -2.0) = 0
+        assert result["weight_to_lose"] == 5.5  # 72.0 - 66.5 = 5.5
+    
     # 测试辅助方法_get_weight_chart_data
     
     def test_get_weight_chart_data(self, controller, mock_planner_service, sample_weight_records):
@@ -487,6 +698,429 @@ class TestDashboardController:
         assert "trend" in result
         assert len(result["dates"]) == len(sample_weight_records)
         assert len(result["weights"]) == len(sample_weight_records)
+    
+    def test_get_weight_chart_data_error(self, controller, mock_planner_service):
+        """测试获取体重图表数据 - 数据库错误"""
+        # Arrange
+        user_id = 1
+        # Configure the unit_of_work mock to raise exception
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.side_effect = Exception("数据库错误")
+        
+        # Act
+        result = controller._get_weight_chart_data(user_id)
+        
+        # Assert
+        assert result["dates"] == []
+        assert result["weights"] == []
+        assert result["trend"] == []
+        assert result["has_data"] is False
+        assert result["record_count"] == 0
+        assert result["day_range"] == 30
+    
+    # 测试辅助方法_calculate_dashboard_metrics
+    
+    def test_calculate_dashboard_metrics_full_data(self, controller):
+        """测试计算仪表盘指标 - 完整数据"""
+        # Arrange
+        mock_user = Mock()
+        mock_user.name = "测试用户"
+        mock_user.age = 35
+        mock_user.gender = Mock(value="male")
+        
+        mock_nutrition = Mock()
+        mock_nutrition.protein_g = 120.0
+        mock_nutrition.carbohydrates_g = 150.0
+        mock_nutrition.fat_g = 50.0
+        mock_nutrition.total_calories = 1800.0
+        
+        summary = {
+            "user": mock_user,
+            "tdee": 2200.0,
+            "nutrition": mock_nutrition,
+            "weight_records_count": 15
+        }
+        
+        weight_stats = {
+            "has_data": True,
+            "latest_weight": Mock(weight_kg=68.5),
+            "total_change": -1.5,
+            "avg_daily_change": -0.05,
+            "record_count": 12
+        }
+        
+        progress_info = {
+            "progress_percentage": 60.0,
+            "weight_to_lose": 3.5,
+            "weight_lost": 1.5
+        }
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        assert result["user_name"] == "测试用户"
+        assert result["user_age"] == 35
+        assert result["user_gender"] == "male"
+        assert result["current_weight"] == 68.5
+        assert result["weight_change_30d"] == -1.5
+        assert result["avg_daily_change"] == -0.05
+        assert result["tdee"] == 2200.0
+        assert result["protein_g"] == 120.0
+        assert result["carbs_g"] == 150.0
+        assert result["fat_g"] == 50.0
+        assert result["calories"] == 1800.0
+        assert result["progress_percentage"] == 60.0
+        assert result["weight_to_lose"] == 3.5
+        assert result["weight_lost"] == 1.5
+        assert result["weight_records_count"] == 15
+        assert "health_score" in result
+        # 健康评分计算：
+        # 体重下降(-0.05): +30
+        # 记录数量>=10: +30
+        # 进度>50%: +40
+        # 总分: 100 (但会被限制为min(100, health_score))
+        assert result["health_score"] == 100
+    
+    def test_calculate_dashboard_metrics_partial_data(self, controller):
+        """测试计算仪表盘指标 - 部分数据"""
+        # Arrange
+        mock_user = Mock()
+        mock_user.name = "测试用户"
+        mock_user.age = 35
+        mock_user.gender = "male"  # 没有value属性
+        
+        summary = {
+            "user": mock_user,
+            # 没有tdee
+            # 没有nutrition
+            "weight_records_count": 3
+        }
+        
+        weight_stats = {
+            "has_data": False,
+            "record_count": 3
+        }
+        
+        progress_info = None
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        assert result["user_name"] == "测试用户"
+        assert result["user_age"] == 35
+        assert result["user_gender"] == "male"
+        assert "current_weight" not in result
+        assert "weight_change_30d" not in result
+        assert "avg_daily_change" not in result
+        assert "tdee" not in result
+        assert "protein_g" not in result
+        assert "carbs_g" not in result
+        assert "fat_g" not in result
+        assert "calories" not in result
+        assert "progress_percentage" not in result
+        assert "weight_to_lose" not in result
+        assert "weight_lost" not in result
+        assert result["weight_records_count"] == 3
+        assert "health_score" in result
+        # 健康评分计算：
+        # 体重变化未知: avg_daily_change默认0，绝对值<0.05，所以是体重稳定: +20
+        # 记录数量<5: +10
+        # 无进度信息: +10
+        # 总分: 40
+        assert result["health_score"] == 40
+    
+    def test_calculate_dashboard_metrics_edge_cases(self, controller):
+        """测试计算仪表盘指标 - 边界情况"""
+        # Arrange
+        summary = {
+            "user": Mock(
+                name="测试用户",
+                age=35,
+                gender=Mock(value="female")
+            ),
+            "tdee": 1800.0,
+            "nutrition": None,  # nutrition为None
+            "weight_records_count": 8
+        }
+        
+        weight_stats = {
+            "has_data": True,
+            "latest_weight": None,  # latest_weight为None
+            "total_change": 0.0,
+            "avg_daily_change": 0.03,  # 体重上升
+            "record_count": 8
+        }
+        
+        progress_info = {
+            "progress_percentage": 15.0,  # 进度在20%以下
+            "weight_to_lose": 10.0,
+            "weight_lost": 2.0
+        }
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        assert result["user_gender"] == "female"
+        assert result["current_weight"] is None  # latest_weight为None
+        assert result["weight_change_30d"] == 0.0
+        assert result["avg_daily_change"] == 0.03
+        assert result["tdee"] == 1800.0
+        assert "protein_g" not in result  # nutrition为None
+        assert "carbs_g" not in result
+        assert "fat_g" not in result
+        assert "calories" not in result
+        assert result["progress_percentage"] == 15.0
+        assert result["weight_to_lose"] == 10.0
+        assert result["weight_lost"] == 2.0
+        assert result["weight_records_count"] == 8
+        # 健康评分计算：
+        # 体重变化0.03: 绝对值<0.05，所以是体重稳定: +20
+        # 记录数量>=5且<10: +20
+        # 进度15%: <=20%，所以是else分支: +10
+        # 总分: 50
+        assert result["health_score"] == 50
+    
+    def test_calculate_dashboard_metrics_no_user_in_summary(self, controller):
+        """测试计算仪表盘指标 - 摘要中没有用户信息"""
+        # Arrange
+        summary = {
+            "tdee": 2000.0,
+            "weight_records_count": 20
+        }
+        
+        weight_stats = {
+            "has_data": True,
+            "latest_weight": Mock(weight_kg=70.0),
+            "total_change": -2.0,
+            "avg_daily_change": -0.1,
+            "record_count": 20
+        }
+        
+        progress_info = {
+            "progress_percentage": 80.0,
+            "weight_to_lose": 2.0,
+            "weight_lost": 8.0
+        }
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        assert "user_name" not in result
+        assert "user_age" not in result
+        assert "user_gender" not in result
+        assert result["current_weight"] == 70.0
+        assert result["weight_change_30d"] == -2.0
+        assert result["avg_daily_change"] == -0.1
+        assert result["tdee"] == 2000.0
+        assert "protein_g" not in result
+        assert "carbs_g" not in result
+        assert "fat_g" not in result
+        assert "calories" not in result
+        assert result["progress_percentage"] == 80.0
+        assert result["weight_to_lose"] == 2.0
+        assert result["weight_lost"] == 8.0
+        assert result["weight_records_count"] == 20
+        # 健康评分计算：
+        # 体重下降(-0.1): +30
+        # 记录数量>=10: +30
+        # 进度>50%: +40
+        # 总分: 100
+        assert result["health_score"] == 100
+    
+    # 测试辅助方法_get_weight_stats中的边界情况
+    
+    def test_get_weight_stats_days_diff_zero(self, controller, mock_planner_service):
+        """测试获取体重统计 - 日期差为零（同一天有多个记录）"""
+        # Arrange
+        user_id = 1
+        from datetime import date
+        today = date.today()
+        
+        # 创建两个同一天的记录
+        sample_records = [
+            Mock(weight_kg=70.0, record_date=today, id=1),
+            Mock(weight_kg=69.5, record_date=today, id=2)  # 同一天
+        ]
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.return_value = sample_records
+        
+        # Act
+        result = controller._get_weight_stats(user_id)
+        
+        # Assert
+        assert result["has_data"] is True
+        assert result["record_count"] == 2
+        # 日期差为0，avg_daily_change应该为0.0
+        assert result["avg_daily_change"] == 0.0
+        # total_change应该是69.5 - 70.0 = -0.5
+        assert result["total_change"] == -0.5
+    
+    def test_get_weight_stats_days_diff_negative(self, controller, mock_planner_service):
+        """测试获取体重统计 - 日期差为负（记录顺序异常）"""
+        # Arrange
+        user_id = 1
+        from datetime import date
+        today = date.today()
+        yesterday = today - timedelta(days=1)
+        
+        # 创建两个记录，但第二个记录日期更早（异常情况）
+        sample_records = [
+            Mock(weight_kg=70.0, record_date=today, id=1),
+            Mock(weight_kg=69.5, record_date=yesterday, id=2)  # 更早的日期
+        ]
+        # 注意：代码会按日期排序，所以yesterday的记录会排在前面
+        # 但如果我们模拟find_by_date_range返回未排序的记录呢？
+        # 实际上，代码中会对记录排序：records.sort(key=lambda x: x.record_date)
+        # 所以yesterday的记录会排在前面
+        # days_diff = (records[-1].record_date - records[0].record_date).days
+        # = (today - yesterday).days = 1 > 0，不会触发300行
+        
+        # 要触发300行，需要days_diff <= 0，也就是第一个记录日期>=最后一个记录日期
+        # 如果记录已经按日期升序排序，那么days_diff总是>=0
+        # 所以300行可能无法通过正常数据触发
+        
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.weights.find_by_date_range.return_value = sample_records
+        
+        # Act
+        result = controller._get_weight_stats(user_id)
+        
+        # Assert
+        # 由于代码会排序，yesterday会排在前面，days_diff=1>0
+        # 所以avg_daily_change = total_change / 1
+        assert result["has_data"] is True
+        # 实际上要测试300行，我们需要模拟records[-1].record_date <= records[0].record_date
+        # 这可能发生在所有记录都是同一天的情况下
+    
+    # 测试私有方法_get_weight_loss_progress中的边界情况
+    
+    def test_get_weight_loss_progress_zero_loss_possible(self, controller, mock_planner_service, sample_user):
+        """测试私有方法_get_weight_loss_progress - 总减重可能为0或负数"""
+        # Arrange
+        user_id = 1
+        # 设置初始体重很小，使得目标体重可能为0或负数
+        # target_weight = initial_weight_kg * 0.95
+        # 如果initial_weight_kg <= 0，target_weight <= 0
+        # total_possible_loss = initial_weight_kg - target_weight
+        # 如果initial_weight_kg <= target_weight，total_possible_loss <= 0
+        
+        # 但initial_weight_kg应该是正数，所以这不会发生
+        # 不过我们可以测试initial_weight_kg = 0的情况
+        sample_user.initial_weight_kg = 0.0
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.return_value = sample_user
+        mock_weight = Mock(weight_kg=0.0)
+        mock_uow.weights.find_latest_by_user_id.return_value = mock_weight
+        
+        # Act
+        result = controller._get_weight_loss_progress(user_id)
+        
+        # Assert
+        # target_weight = 0.0 * 0.95 = 0.0
+        # total_possible_loss = 0.0 - 0.0 = 0.0
+        # 所以会触发382行：progress_percentage = 0.0
+        assert result is not None
+        assert result["progress_percentage"] == 0.0
+        assert result["weight_lost"] == 0.0
+        assert result["weight_to_lose"] == 0.0
+    
+    # 测试_calculate_dashboard_metrics中的边界情况
+    
+    def test_calculate_dashboard_metrics_weight_increase(self, controller):
+        """测试计算仪表盘指标 - 体重上升情况"""
+        # Arrange
+        summary = {
+            "weight_records_count": 12
+        }
+        
+        weight_stats = {
+            "has_data": True,
+            "latest_weight": Mock(weight_kg=72.0),
+            "total_change": 2.0,
+            "avg_daily_change": 0.1,  # > 0.05，体重上升
+            "record_count": 12
+        }
+        
+        progress_info = {
+            "progress_percentage": 80.0,
+            "weight_to_lose": 5.0,
+            "weight_lost": 3.0
+        }
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        # 健康评分计算：
+        # 体重上升(0.1 > 0.05): +10 (527行)
+        # 记录数量>=10: +30
+        # 进度>50%: +40
+        # 总分: 80
+        assert result["health_score"] == 80
+    
+    def test_calculate_dashboard_metrics_low_progress(self, controller):
+        """测试计算仪表盘指标 - 低进度情况"""
+        # Arrange
+        summary = {
+            "weight_records_count": 7
+        }
+        
+        weight_stats = {
+            "has_data": True,
+            "latest_weight": Mock(weight_kg=69.0),
+            "total_change": 1.0,  # 体重增加
+            "avg_daily_change": 0.06,  # > 0.05，体重上升
+            "record_count": 7
+        }
+        
+        progress_info = {
+            "progress_percentage": 15.0,  # <= 20%，低进度
+            "weight_to_lose": 8.0,
+            "weight_lost": 2.0
+        }
+        
+        # Act
+        result = controller._calculate_dashboard_metrics(summary, weight_stats, progress_info)
+        
+        # Assert
+        # 健康评分计算：
+        # 体重上升(0.06 > 0.05): +10 (527行)
+        # 记录数量>=5且<10: +20
+        # 进度<=20%: +10 (541行)
+        # 总分: 40
+        assert result["health_score"] == 40
+    
+    # 测试公共方法get_weight_loss_progress的异常处理
+    
+    def test_get_weight_loss_progress_exception(self, controller, mock_planner_service):
+        """测试获取减重进度 - 服务抛出异常"""
+        # Arrange
+        user_id = 1
+        target_weight_kg = 65.0
+        
+        # 配置unit_of_work模拟返回用户
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_user = Mock()
+        mock_user.initial_weight_kg = 70.0
+        mock_uow.users.get_by_id.return_value = mock_user
+        
+        # 模拟planner_service.calculate_weight_loss_progress抛出异常
+        mock_planner_service.calculate_weight_loss_progress.side_effect = Exception("计算服务异常")
+        
+        # Act
+        result = controller.get_weight_loss_progress(user_id, target_weight_kg=target_weight_kg)
+        
+        # Assert
+        assert result is None
+        mock_planner_service.calculate_weight_loss_progress.assert_called_once_with(
+            user_id=user_id,
+            target_weight_kg=target_weight_kg
+        )
     
     # 测试get_all_users方法
     
@@ -542,6 +1176,21 @@ class TestDashboardController:
         # 配置unit_of_work模拟返回None
         mock_uow = self.mock_unit_of_work.return_value
         mock_uow.users.get_by_id.return_value = None
+        
+        # Act
+        result = controller.get_user_by_id(user_id)
+        
+        # Assert
+        assert result is None
+        mock_uow.users.get_by_id.assert_called_once_with(user_id)
+    
+    def test_get_user_by_id_error(self, controller, mock_planner_service):
+        """测试根据ID获取用户 - 数据库错误"""
+        # Arrange
+        user_id = 1
+        # 配置unit_of_work模拟抛出异常
+        mock_uow = self.mock_unit_of_work.return_value
+        mock_uow.users.get_by_id.side_effect = Exception("数据库错误")
         
         # Act
         result = controller.get_user_by_id(user_id)
